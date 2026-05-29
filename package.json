@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome check",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "check": "biome check --write",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "engines": {
     "node": "24.15.0",
@@ -20,11 +23,31 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
+    "@chromatic-com/storybook": "^5.2.1",
     "@pandacss/dev": "^0.47",
+    "@playwright/test": "^1.60.0",
+    "@storybook/addon-a11y": "^10.4.1",
+    "@storybook/addon-docs": "^10.4.1",
+    "@storybook/addon-mcp": "^0.6.0",
+    "@storybook/addon-vitest": "^10.4.1",
+    "@storybook/nextjs-vite": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5"
+    "@vitejs/plugin-react": "^6.0.2",
+    "@vitest/browser-playwright": "^4.1.7",
+    "@vitest/coverage-v8": "^4.1.7",
+    "jsdom": "^29.1.1",
+    "msw": "^2.14.6",
+    "msw-storybook-addon": "^2.0.7",
+    "playwright": "^1.60.0",
+    "storybook": "^10.4.1",
+    "typescript": "^5",
+    "vite": "^8.0.14",
+    "vitest": "^4.1.7"
   },
   "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8"
 }
