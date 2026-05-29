@@ -1,15 +1,10 @@
-@import "tailwindcss";
+@layer reset, base, tokens, recipes, utilities;
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-geist-sans: system-ui, -apple-system, sans-serif;
+  --font-geist-mono: 'Courier New', monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +14,269 @@
   }
 }
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Utility classes for Panda CSS compatibility */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.max-w-xs {
+  max-width: 20rem;
+}
+
+.max-w-md {
+  max-width: 28rem;
+}
+
+.max-w-3xl {
+  max-width: 48rem;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.h-12 {
+  height: 3rem;
+}
+
+.min-h-full {
+  min-height: 100%;
+}
+
+.px-5 {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.px-16 {
+  padding-left: 4rem;
+  padding-right: 4rem;
+}
+
+.py-32 {
+  padding-top: 8rem;
+  padding-bottom: 8rem;
+}
+
+.bg-white {
+  background-color: #ffffff;
+}
+
+.bg-black {
+  background-color: #000000;
+}
+
+.bg-zinc-50 {
+  background-color: #fafafa;
+}
+
+.bg-foreground {
+  background-color: var(--foreground);
+}
+
+.text-background {
+  color: var(--background);
+}
+
+.text-black {
+  color: #000000;
+}
+
+.text-zinc-50 {
+  color: #fafafa;
+}
+
+.text-zinc-400 {
+  color: #a1a1a1;
+}
+
+.text-zinc-600 {
+  color: #52525b;
+}
+
+.text-zinc-950 {
+  color: #09090b;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-base {
+  font-size: 1rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-sans {
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.leading-8 {
+  line-height: 2rem;
+}
+
+.leading-10 {
+  line-height: 2.5rem;
+}
+
+.tracking-tight {
+  letter-spacing: -0.02em;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.transition-colors {
+  transition-property: background-color, border-color, color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.hover\:bg-\[\#383838\]:hover {
+  background-color: #383838;
+}
+
+.dark\:invert {
+  filter: invert(1);
+}
+
+.dark\:bg-black {
+  background-color: #000000;
+}
+
+.dark\:bg-\[\#ccc\]:hover {
+  background-color: #ccc;
+}
+
+.dark\:text-zinc-50 {
+  color: #fafafa;
+}
+
+.dark\:text-zinc-400 {
+  color: #a1a1a1;
+}
+
+.dark\:hover-\[\#ccc\]:hover {
+  background-color: #ccc;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dark\:invert {
+    filter: invert(1);
+  }
+
+  .dark\:bg-black {
+    background-color: #000000;
+  }
+
+  .dark\:text-zinc-50 {
+    color: #fafafa;
+  }
+
+  .dark\:text-zinc-400 {
+    color: #a1a1a1;
+  }
+
+  .dark\:hover\:bg-\[\#ccc\]:hover {
+    background-color: #ccc;
+  }
+}
+
+@media (min-width: 640px) {
+  .sm\:items-start {
+    align-items: flex-start;
+  }
+
+  .sm\:text-left {
+    text-align: left;
+  }
+
+  .sm\:flex-row {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:w-\[\158px\] {
+    width: 158px;
+  }
 }
