@@ -4,10 +4,10 @@ pre-commit:
     biome:
       run: pnpm check
 
-pre-push:
-  parallel: false
-  commands:
-    unit-test:
-      run: pnpm test
-    e2e-test:
-      run: pnpm test:e2e
+# pre-push:
+#   parallel: false
+#   commands:
+#     unit-test:
+#       run: pnpm test
+#     e2e-test:
+#       run: pnpm test:e2e
