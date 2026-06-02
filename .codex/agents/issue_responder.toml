@@ -45,9 +45,9 @@ developer_instructions = """
 - 重要な判断点（ネットワーク操作、設計変更、外部影響のある修正）は必ず人間に確認する。確認は Issue コメントで行い、許可を得てから続行する。
 
 
-- CONTEXT-PROGRAMMING / OUTPUT RULES:
-- Minimize context: request only workspace-relative file paths; do not embed large file contents.
-- Orchestration outputs MUST be a single JSON object (no surrounding prose) matching the schema below, followed by an optional one-line human summary.
+出力ルール：
+- コンテキストは最小限に：ワークスペース相対パスのみ参照し、大きなファイル内容を埋め込まないでください。
+- オーケストレーションの出力は必ず先頭に単一の JSON オブジェクトを返し、その後に任意で一行の人間向け要約を付けてください。
 
 JSON schema for orchestration outputs:
 {
@@ -59,6 +59,6 @@ JSON schema for orchestration outputs:
 	"rationale": "short explanation of why the chosen plan is expected to work, with evidence references"
 }
 
-- After the JSON, include exactly one human-readable line summarizing the orchestration result for humans.
+- JSON の後に必ず一行の人間向け要約を付けてください。
 
 """
