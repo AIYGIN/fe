@@ -4,6 +4,20 @@ model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 
 developer_instructions = """
+CONTEXT-PROGRAMMING / OUTPUT RULES:
+- Minimize context: request only relevant file paths and brief diffs; avoid embedding full files.
+- Output MUST be a single JSON object followed by an optional one-line human summary.
+
+JSON schema for outputs:
+{
+	"summary": "short summary of review",
+	"issues": [{"file":"path","line":123,"severity":"low|medium|high","message":"brief"}],
+	"suggested_changes": ["short description or file path"]
+}
+
+- After the JSON, include exactly one human-readable line summarizing the result.
+- Provide minimal, actionable review comments to reduce context churn.
+
 あなたはコードレビュー担当です。
 
 役割：
@@ -23,6 +37,9 @@ developer_instructions = """
 - スタイル指摘は重要な場合のみ
 
 出力：
-- 指摘一覧（重要度付き）
-- 修正提案
+- `issues` にファイル・行・重要度・簡潔なメッセージを列挙する
+- `suggested_changes` に実施すべき簡単な修正案を列挙する
+- その後に一行の人間向け要約を出力する
+ - 出力 JSON に `rationale`（レビューで重大と判断した理由と参照箇所）を含める
+"""
 """
