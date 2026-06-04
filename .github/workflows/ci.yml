@@ -1,0 +1,168 @@
+# 「actions/checkout@v6」や「dorny/paths-filter@v4」はnodeのバージョンが上がった際にバージョンを上げる必要がでる可能性があります。
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v6
+
+      - name: 差分チェック
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            app:
+              - 'src/**'
+              - 'tests/**'
+              - 'public/**'
+
+              # Next.js / build config
+              - 'next.config.*'
+              - 'tsconfig.json'
+              - 'postcss.config.*'
+
+              # package manager
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+
+              # lint / format
+              - 'biome.json'
+
+              # test tools config
+              - 'vitest.config.*'
+              - 'vitest.setup.*'
+              - 'vitest.shims.*'
+              - 'playwright.config.*'
+
+  # biome check（フォーマット修正・import整理・lint）
+  check:
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v6
+
+      - name: Node.jsのインストール
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+
+      - name: Corepackの有効化
+        run: corepack enable
+
+      - name: Corepackでpnpmのインストール
+        run: corepack prepare pnpm@10.33.2 --activate
+
+      - name: pnpmの「store path」を取得
+        id: pnpm-store
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: pnpmのキャッシュを取得
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.pnpm-store.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: .lockから依存関係をインストール
+        run: pnpm install --frozen-lockfile
+
+      - name: biome checkを実行
+        run: pnpm check
+
+  # 「unit/integration」tests 
+  unit-test:
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v6
+
+      - name: Node.jsのインストール
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+
+      - name: Corepackの有効化
+        run: corepack enable
+
+      - name: Corepackでpnpmのインストール
+        run: corepack prepare pnpm@10.33.2 --activate
+
+      - name: pnpmの「store path」を取得
+        id: pnpm-store
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: pnpmのキャッシュを取得
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.pnpm-store.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: .lockから依存関係をインストール
+        run: pnpm install --frozen-lockfile
+
+      - name: テスト「unit/integration」の実行
+        run: pnpm test
+
+  # e2e tests
+  e2e-test:
+    needs: changes
+    if: github.ref == 'refs/heads/main' && needs.changes.outputs.app == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v6
+
+      - name: Node.jsのインストール
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+
+      - name: Corepackの有効化
+        run: corepack enable
+
+      - name: Corepackでpnpmのインストール
+        run: corepack prepare pnpm@10.33.2 --activate
+
+      - name: pnpmの「store path」を取得
+        id: pnpm-store
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: pnpmのキャッシュを取得
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.pnpm-store.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: .lockから依存関係をインストール
+        run: pnpm install --frozen-lockfile
+
+      - name: playwrightのブラウザをインストール
+        run: pnpm exec playwright install --with-deps
+
+      - name: テスト「e2e」の実行
+        run: pnpm test:e2e
