@@ -3,9 +3,13 @@ import type { Preview } from "@storybook/nextjs-vite";
 // mswの設定追加
 import { initialize, mswLoader } from "msw-storybook-addon";
 import { sampleHandlers } from "../src/lib/msw/handlers/sample";
+import { todoHandlers } from "../src/lib/msw/handlers/todos";
 
 // mswの初期化
-initialize({ onUnhandledRequest: "warn" }, [...sampleHandlers]);
+initialize({ onUnhandledRequest: "warn" }, [
+  ...sampleHandlers,
+  ...todoHandlers,
+]);
 
 const preview: Preview = {
   // mswの設定追加

@@ -1,0 +1,298 @@
+.shell {
+  min-height: 100vh;
+  background: #f7f7f2;
+  color: #17211d;
+}
+
+.container {
+  width: min(100%, 960px);
+  margin: 0 auto;
+  padding: 48px 20px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin-bottom: 8px;
+  color: #53625d;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.title {
+  color: #17211d;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1;
+}
+
+.summary {
+  min-width: 140px;
+  border: 1px solid #cbd6d2;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 14px 16px;
+  text-align: right;
+}
+
+.summaryValue {
+  display: block;
+  color: #0f766e;
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.summaryLabel {
+  display: block;
+  margin-top: 4px;
+  color: #53625d;
+  font-size: 0.875rem;
+}
+
+.panel {
+  border: 1px solid #cbd6d2;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgb(23 33 29 / 8%);
+}
+
+.form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 1px solid #e3e8e6;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.label {
+  color: #2d3a36;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.input {
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid #aab8b3;
+  border-radius: 6px;
+  padding: 0 12px;
+  color: #17211d;
+  font: inherit;
+}
+
+.input:focus,
+.button:focus-visible,
+.ghostButton:focus-visible,
+.dangerButton:focus-visible,
+.checkbox:focus-visible {
+  outline: 3px solid #99f6e4;
+  outline-offset: 2px;
+}
+
+.button,
+.ghostButton,
+.dangerButton {
+  min-height: 44px;
+  border-radius: 6px;
+  padding: 0 16px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.button {
+  align-self: end;
+  border: 1px solid #0f766e;
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.ghostButton {
+  border: 1px solid #aab8b3;
+  background: #ffffff;
+  color: #17211d;
+}
+
+.dangerButton {
+  border: 1px solid #b42318;
+  background: #b42318;
+  color: #ffffff;
+}
+
+.errorText {
+  color: #b42318;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e3e8e6;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.filterButton {
+  min-height: 36px;
+  border: 1px solid #aab8b3;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #17211d;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filterButton[aria-pressed="true"] {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.content {
+  min-height: 240px;
+  padding: 20px;
+}
+
+.stateBox {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+  color: #53625d;
+  text-align: center;
+}
+
+.stateBoxStrong {
+  display: block;
+  margin-bottom: 8px;
+  color: #17211d;
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #d7dfdc;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: #0f766e;
+}
+
+.todoTitle {
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.completed {
+  color: #6b7280;
+  text-decoration: line-through;
+}
+
+.dialogBackdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(15 23 42 / 45%);
+  padding: 20px;
+}
+
+.dialog {
+  width: min(100%, 420px);
+  border: 1px solid #d7dfdc;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 20px;
+  box-shadow: 0 24px 60px rgb(15 23 42 / 20%);
+}
+
+.dialogTitle {
+  margin-bottom: 8px;
+  color: #17211d;
+  font-size: 1.25rem;
+}
+
+.dialogBody {
+  color: #53625d;
+  line-height: 1.6;
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 28px 12px;
+  }
+
+  .header,
+  .form {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    display: grid;
+    align-items: start;
+  }
+
+  .summary {
+    text-align: left;
+  }
+
+  .filters {
+    overflow-x: auto;
+  }
+
+  .item {
+    grid-template-columns: auto 1fr;
+  }
+
+  .item .ghostButton {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
