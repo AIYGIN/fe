@@ -230,12 +230,8 @@ export function TodoPage({
       <div className={styles.container}>
         <header className={styles.header}>
           <div className={styles.heading}>
-            <p className={styles.eyebrow}>FOCUS WORKSPACE</p>
-            <h1 className={styles.title} aria-label="TODOリスト">
-              今日を、軽くする。
-            </h1>
             <p className={styles.intro}>
-              やることを記録し、ひとつずつ終わらせるためのTODOリスト
+              TODOリスト
             </p>
           </div>
           <output className={styles.summary} aria-label="未完了件数">

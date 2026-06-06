@@ -34,22 +34,6 @@
   max-width: 680px;
 }
 
-.eyebrow {
-  margin: 0 0 10px;
-  color: var(--accent);
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-}
-
-.title {
-  margin: 0;
-  font-size: clamp(2.35rem, 6vw, 4.6rem);
-  font-weight: 760;
-  letter-spacing: -0.055em;
-  line-height: 0.98;
-}
-
 .intro {
   margin: 18px 0 0;
   color: var(--muted);
