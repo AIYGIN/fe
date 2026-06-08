@@ -230,9 +230,7 @@ export function TodoPage({
       <div className={styles.container}>
         <header className={styles.header}>
           <div className={styles.heading}>
-            <p className={styles.intro}>
-              TODOリスト
-            </p>
+            <h1 className={styles.intro}>TODOリスト</h1>
           </div>
           <output className={styles.summary} aria-label="未完了件数">
             <span className={styles.summaryValue}>{counts.active}</span>
