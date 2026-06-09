@@ -1,12 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  createTodo,
-  deleteTodo,
-  fetchTodos,
-  updateTodo,
-} from "@/lib/api/todos";
+import { createTodo, deleteTodo, fetchTodos, updateTodo } from "@/apis/todos";
 import type { Todo } from "@/types/todo";
 
 type LoadStatus = "idle" | "loading" | "error";

@@ -1,16 +1,13 @@
-export type Todo = {
-  id: string;
-  title: string;
-  completed: boolean;
-  createdAt: string;
-};
+import type {
+  CreateTodoRequestDto,
+  TodoDto,
+  UpdateTodoRequestDto,
+} from "@/apis/generated/model";
+
+export type Todo = TodoDto;
 
 export type TodoFilter = "all" | "active" | "completed";
 
-export type TodoCreateInput = {
-  title: string;
-};
+export type TodoCreateInput = CreateTodoRequestDto;
 
-export type TodoUpdateInput = {
-  completed: boolean;
-};
+export type TodoUpdateInput = UpdateTodoRequestDto;

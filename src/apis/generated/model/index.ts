@@ -6,4 +6,8 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from './createTodoRequestDto';
+export * from './errorResponseSchema';
+export * from './todoDto';
+export * from './updateTodoRequestDto';
 export * from './userDto';
