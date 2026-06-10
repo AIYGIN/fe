@@ -1,5 +1,9 @@
+import type {
+  CreateTodoRequestDto,
+  TodoDto,
+  UpdateTodoRequestDto,
+} from "@/apis/generated/model";
 import { endpoints } from "@/lib/api/endpoints";
-import type { Todo, TodoCreateInput, TodoUpdateInput } from "@/types/todo";
 
 type ApiErrorBody = {
   message?: string;
@@ -38,10 +42,10 @@ const parseJson = async <T>(response: Response): Promise<T> => {
 
 export const fetchTodos = async () => {
   const response = await fetch(resolveApiUrl(endpoints.todos));
-  return parseJson<Todo[]>(response);
+  return parseJson<TodoDto[]>(response);
 };
 
-export const createTodo = async (input: TodoCreateInput) => {
+export const createTodo = async (input: CreateTodoRequestDto) => {
   const response = await fetch(resolveApiUrl(endpoints.todos), {
     method: "POST",
     headers: {
@@ -50,10 +54,10 @@ export const createTodo = async (input: TodoCreateInput) => {
     body: JSON.stringify(input),
   });
 
-  return parseJson<Todo>(response);
+  return parseJson<TodoDto>(response);
 };
 
-export const updateTodo = async (id: string, input: TodoUpdateInput) => {
+export const updateTodo = async (id: string, input: UpdateTodoRequestDto) => {
   const response = await fetch(resolveApiUrl(endpoints.todo(id)), {
     method: "PATCH",
     headers: {
@@ -62,7 +66,7 @@ export const updateTodo = async (id: string, input: TodoUpdateInput) => {
     body: JSON.stringify(input),
   });
 
-  return parseJson<Todo>(response);
+  return parseJson<TodoDto>(response);
 };
 
 export const deleteTodo = async (id: string) => {

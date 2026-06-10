@@ -12,31 +12,6 @@ import {
 
 const fallbackMessage = "TODO API request failed";
 
-const resolveRequestUrl = (input: RequestInfo | URL) => {
-  if (typeof input !== "string" || !input.startsWith("/todos")) {
-    return input;
-  }
-
-  const path = `/api${input}`;
-
-  return process.env.NODE_ENV === "test"
-    ? `http://localhost:3000${path}`
-    : path;
-};
-
-const callGeneratedOperation = <T>(operation: () => Promise<T>) => {
-  const originalFetch = globalThis.fetch;
-
-  globalThis.fetch = (input, init) =>
-    originalFetch(resolveRequestUrl(input), init);
-
-  try {
-    return operation();
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-};
-
 export class TodoApiError extends Error {
   constructor(
     message: string,
@@ -60,7 +35,7 @@ const runOperation = async <T>(
   >,
 ) => {
   try {
-    const response = await callGeneratedOperation(operation);
+    const response = await operation();
 
     if (response.status >= 200 && response.status < 300) {
       return response.data as T;
