@@ -11,9 +11,9 @@ export const todoHandlersUrl = {
   detail: "*/api/todos/:id",
 } as const;
 
-const generatedTodoHandlersUrl = {
-  collection: "http://localhost:3001/todos",
-  detail: "http://localhost:3001/todos/:id",
+export const generatedTodoHandlersUrl = {
+  collection: /^https?:\/\/[^/]+\/todos$/,
+  detail: /^https?:\/\/[^/]+\/todos\/[^/]+$/,
 } as const;
 
 const forwardGeneratedRequest: HttpResponseResolver = async ({ request }) => {
@@ -77,6 +77,14 @@ export const resetTodoStore = (items: TodoDto[] = createInitialTodos()) => {
 const getTodosHandler: HttpResponseResolver = () =>
   HttpResponse.json(sortNewestFirst(todos));
 
+const getTodoId = (
+  request: Request,
+  id: string | readonly string[] | undefined,
+) =>
+  typeof id === "string"
+    ? id
+    : (new URL(request.url).pathname.split("/").pop() ?? "");
+
 const createTodoHandler: HttpResponseResolver = async ({ request }) => {
   const body = (await request.json().catch(() => ({}))) as {
     title?: unknown;
@@ -102,7 +110,7 @@ const createTodoHandler: HttpResponseResolver = async ({ request }) => {
 };
 
 const updateTodoHandler: HttpResponseResolver = async ({ params, request }) => {
-  const id = String(params.id);
+  const id = getTodoId(request, params.id);
   const body = (await request.json().catch(() => ({}))) as {
     completed?: unknown;
   };
@@ -128,8 +136,8 @@ const updateTodoHandler: HttpResponseResolver = async ({ params, request }) => {
   return HttpResponse.json(updated);
 };
 
-const deleteTodoHandler: HttpResponseResolver = ({ params }) => {
-  const id = String(params.id);
+const deleteTodoHandler: HttpResponseResolver = ({ params, request }) => {
+  const id = getTodoId(request, params.id);
   const exists = todos.some((todo) => todo.id === id);
 
   if (!exists) {
