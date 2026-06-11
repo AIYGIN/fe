@@ -11,6 +11,12 @@ export default defineConfig({
       schemas: "./src/apis/generated/model",
       client: "fetch",
       mock: true,
+      override: {
+        mutator: {
+          path: "./src/apis/request.ts",
+          name: "request",
+        },
+      },
     },
   },
 });

@@ -1,0 +1,4 @@
+interface:
+  display_name: "PR Feedback Fix"
+  short_description: "PR指摘修正とIssue適合性・品質チェックを一括実行"
+  default_prompt: "Use $pr-feedback-fix to collect feedback on the current PR, apply required fixes, and verify the linked issue requirements and quality checks."

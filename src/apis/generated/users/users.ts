@@ -5,63 +5,57 @@
  * Frontend 向け BFF API
  * OpenAPI spec version: 1.0
  */
-import type {
-  UserDto
-} from '../model';
 
+import { request } from "../../request";
+import type { UserDto } from "../model";
 
 export type userControllerGetUserResponse200 = {
-  data: UserDto
-  status: 200
-}
+  data: UserDto;
+  status: 200;
+};
 
 export type userControllerGetUserResponse400 = {
-  data: void
-  status: 400
-}
+  data: void;
+  status: 400;
+};
 
 export type userControllerGetUserResponse500 = {
-  data: void
-  status: 500
-}
-
-export type userControllerGetUserResponseSuccess = (userControllerGetUserResponse200) & {
-  headers: Headers;
-};
-export type userControllerGetUserResponseError = (userControllerGetUserResponse400 | userControllerGetUserResponse500) & {
-  headers: Headers;
+  data: void;
+  status: 500;
 };
 
-export type userControllerGetUserResponse = (userControllerGetUserResponseSuccess | userControllerGetUserResponseError)
+export type userControllerGetUserResponseSuccess =
+  userControllerGetUserResponse200 & {
+    headers: Headers;
+  };
+export type userControllerGetUserResponseError = (
+  | userControllerGetUserResponse400
+  | userControllerGetUserResponse500
+) & {
+  headers: Headers;
+};
 
-export const getUserControllerGetUserUrl = (userId: string,) => {
+export type userControllerGetUserResponse =
+  | userControllerGetUserResponseSuccess
+  | userControllerGetUserResponseError;
 
-
-
-
-  return `/users/${userId}`
-}
+export const getUserControllerGetUserUrl = (userId: string) => {
+  return `/users/${userId}`;
+};
 
 /**
  * 指定したユーザーIDに紐づくユーザー情報を取得する。
  * @summary ユーザー取得
  */
-export const userControllerGetUser = async (userId: string, options?: RequestInit): Promise<userControllerGetUserResponse> => {
-
-  const res = await fetch(getUserControllerGetUserUrl(userId),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: userControllerGetUserResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as userControllerGetUserResponse
-}
-
-
+export const userControllerGetUser = async (
+  userId: string,
+  options?: RequestInit,
+): Promise<userControllerGetUserResponse> => {
+  return request<userControllerGetUserResponse>(
+    getUserControllerGetUserUrl(userId),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};

@@ -2,19 +2,19 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { beforeEach, describe, expect, it } from "vitest";
+import type { TodoDto } from "@/apis/generated/model";
 import { resetTodoStore } from "@/lib/msw/handlers/todos";
 import { server } from "@/lib/msw/setup/server";
-import type { Todo } from "@/types/todo";
 import { TodoPage } from "./TodoPage";
 
-const newestTodo: Todo = {
+const newestTodo: TodoDto = {
   id: "todo-new",
   title: "新しいTODO",
   completed: false,
   createdAt: "2026-06-05T02:00:00.000Z",
 };
 
-const oldCompletedTodo: Todo = {
+const oldCompletedTodo: TodoDto = {
   id: "todo-old",
   title: "完了済みTODO",
   completed: true,
@@ -227,13 +227,13 @@ describe("TodoPage", () => {
 
   it("完了済みTODOの一括削除が一部失敗した場合は成功分だけ削除し、全通信完了まで再確定できない", async () => {
     const user = userEvent.setup();
-    const successfulCompletedTodo: Todo = {
+    const successfulCompletedTodo: TodoDto = {
       id: "todo-completed-success",
       title: "削除に成功するTODO",
       completed: true,
       createdAt: "2026-06-05T01:30:00.000Z",
     };
-    const failedCompletedTodo: Todo = {
+    const failedCompletedTodo: TodoDto = {
       id: "todo-completed-failure",
       title: "削除に失敗するTODO",
       completed: true,
