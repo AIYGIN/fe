@@ -1,9 +1,8 @@
 import "@testing-library/jest-dom";
 
-// mswの設定追加
 import { afterAll, afterEach, beforeAll } from "vitest";
-import { server } from "./src/lib/msw/setup/server";
+import { todoMockServer } from "./src/apis/todos.mock-server";
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+beforeAll(() => todoMockServer.listen());
+afterEach(() => todoMockServer.resetHandlers());
+afterAll(() => todoMockServer.close());

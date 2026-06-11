@@ -23,8 +23,9 @@ tests は振る舞い契約、
 - コンポーネントが振る舞いを持つ場合のみ `.test.tsx` ファイルを追加する。
   - `.test.tsx` ファイルを追加した際は、RED（失敗状態）で作成する。
   - APIを利用している場合はモック化すること。
-    - `src/lib/msw/handlers` 内にハンドラー用のファイルを作成する。
-    - `src/lib/msw/setup/server.ts` でハンドラーファイルの読み込み設定を行う。
+    - `src/apis/generated` 配下のOrval生成mockを優先し、生成物は手動編集しない。
+    - 共有fixtureと追加handlerは `src/apis/*.fixtures.ts` に配置する。
+    - test用server setupは `src/apis/*.mock-server.ts` に配置する。
 - `.stories.tsx` および `.test.tsx` のレビュー完了前に実装を開始してはいけない。
 - `.stories.tsx` および `.test.tsx` 作成完了後にレビュー可能状態にすること。
 - `.stories.tsx` および `.test.tsx` のレビュー完了後、それらを満たすように実装すること。

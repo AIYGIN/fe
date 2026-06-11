@@ -110,7 +110,9 @@ props 切り替え可能なものは args を利用すること。
 
 API利用時は MSW を利用すること。
 
-- handler は `src/lib/msw/handlers` に配置する
+- Orval生成handlerは `src/apis/generated` 配下の生成物を利用し、手動編集しない
+- 共有fixtureと追加handlerはドメイン単位で `src/apis/*.fixtures.ts` に配置する
+- Storybook用handlerは共有fixtureから生成する
 - Storybook 用 mock と test 用 mock を共有可能にする
 - Loading / Error / Success を切り替え可能にする
 

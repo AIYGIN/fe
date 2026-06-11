@@ -1,33 +1,49 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { delay, HttpResponse, http } from "msw";
+import type { RequestHandler } from "msw";
+import { mswLoader } from "msw-storybook-addon";
 import { expect } from "storybook/test";
-import { generatedTodoHandlersUrl } from "@/lib/msw/handlers/todos";
+import {
+  activeTodoFixture,
+  completedTodoFixture,
+  createDeleteTodoErrorHandler,
+  createEmptyTodosHandler,
+  createFetchTodosErrorHandler,
+  createLoadingTodosHandler,
+  createTodoErrorHandler,
+  createTodoMockHandlers,
+  createUpdateTodoErrorHandler,
+  defaultTodosFixture,
+  longListTodosFixture,
+  storyTodosFixture,
+} from "@/apis/todos.fixtures";
 import { TodoPage } from "./TodoPage";
 
-const activeTodo = {
-  id: "story-active",
-  title: "買い物メモを作る",
-  completed: false,
-  createdAt: "2026-06-05T03:00:00.000Z",
+type TodoStoryParameters = {
+  todoHandlerFactory?: () => RequestHandler[];
 };
 
-const completedTodo = {
-  id: "story-completed",
-  title: "朝のレビューを終える",
-  completed: true,
-  createdAt: "2026-06-05T02:00:00.000Z",
-};
+const loadTodoHandlers = async (context: Parameters<typeof mswLoader>[0]) => {
+  const { todoHandlerFactory } =
+    context.parameters as typeof context.parameters & TodoStoryParameters;
 
-const longListTodos = Array.from({ length: 24 }, (_, index) => ({
-  id: `story-long-${index + 1}`,
-  title: `長い一覧のTODO ${String(index + 1).padStart(2, "0")}`,
-  completed: index % 3 === 0,
-  createdAt: new Date(Date.UTC(2026, 5, 5, 1, 59 - index)).toISOString(),
-}));
+  if (!todoHandlerFactory) {
+    return {};
+  }
+
+  return mswLoader({
+    parameters: {
+      ...context.parameters,
+      msw: {
+        handlers: todoHandlerFactory(),
+      },
+    },
+  });
+};
 
 const meta = {
   title: "Todo/TodoPage",
   component: TodoPage,
+  loaders: [loadTodoHandlers],
   parameters: {
     layout: "fullscreen",
   },
@@ -37,17 +53,23 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  parameters: {
+    todoHandlerFactory: () => createTodoMockHandlers(),
+  },
+  play: async ({ canvas }) => {
+    await expect(
+      await canvas.findByText(defaultTodosFixture[0].title),
+    ).toBeInTheDocument();
+    await expect(
+      await canvas.findByText(defaultTodosFixture[1].title),
+    ).toBeInTheDocument();
+  },
+};
 
 export const Empty: Story = {
   parameters: {
-    msw: {
-      handlers: [
-        http.get(generatedTodoHandlersUrl.collection, () =>
-          HttpResponse.json([]),
-        ),
-      ],
-    },
+    todoHandlerFactory: () => [createEmptyTodosHandler()],
   },
   play: async ({ canvas }) => {
     await expect(
@@ -58,14 +80,7 @@ export const Empty: Story = {
 
 export const Loading: Story = {
   parameters: {
-    msw: {
-      handlers: [
-        http.get(generatedTodoHandlersUrl.collection, async () => {
-          await delay("infinite");
-          return HttpResponse.json([]);
-        }),
-      ],
-    },
+    todoHandlerFactory: () => [createLoadingTodosHandler()],
   },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText("読み込み中")).toBeInTheDocument();
@@ -75,13 +90,7 @@ export const Loading: Story = {
 export const FetchError: Story = {
   name: "Error",
   parameters: {
-    msw: {
-      handlers: [
-        http.get(generatedTodoHandlersUrl.collection, () =>
-          HttpResponse.json({ message: "failed" }, { status: 500 }),
-        ),
-      ],
-    },
+    todoHandlerFactory: () => [createFetchTodosErrorHandler()],
   },
   play: async ({ canvas }) => {
     await expect(
@@ -95,7 +104,7 @@ export const FilteredActive: Story = {
     autoLoad: false,
     initialStatus: "idle",
     initialFilter: "active",
-    initialTodos: [activeTodo, completedTodo],
+    initialTodos: storyTodosFixture,
   },
 };
 
@@ -104,7 +113,7 @@ export const FilteredCompleted: Story = {
     autoLoad: false,
     initialStatus: "idle",
     initialFilter: "completed",
-    initialTodos: [activeTodo, completedTodo],
+    initialTodos: storyTodosFixture,
   },
 };
 
@@ -112,7 +121,7 @@ export const SearchNoResults: Story = {
   args: {
     autoLoad: false,
     initialStatus: "idle",
-    initialTodos: [activeTodo, completedTodo],
+    initialTodos: storyTodosFixture,
   },
   play: async ({ canvas, userEvent }) => {
     const searchbox = await canvas.findByRole("searchbox", {
@@ -130,7 +139,7 @@ export const CompletionProgress: Story = {
   args: {
     autoLoad: false,
     initialStatus: "idle",
-    initialTodos: [activeTodo, completedTodo],
+    initialTodos: storyTodosFixture,
   },
 };
 
@@ -138,11 +147,11 @@ export const DeleteConfirm: Story = {
   args: {
     autoLoad: false,
     initialStatus: "idle",
-    initialTodos: [activeTodo, completedTodo],
+    initialTodos: storyTodosFixture,
   },
   play: async ({ canvas, userEvent }) => {
     const deleteButton = await canvas.findByRole("button", {
-      name: `削除: ${activeTodo.title}`,
+      name: `削除: ${activeTodoFixture.title}`,
     });
     await userEvent.click(deleteButton);
 
@@ -157,7 +166,7 @@ export const BulkDeleteConfirm: Story = {
   args: {
     autoLoad: false,
     initialStatus: "idle",
-    initialTodos: [activeTodo, completedTodo],
+    initialTodos: storyTodosFixture,
   },
   play: async ({ canvas, userEvent }) => {
     const bulkDeleteButton = await canvas.findByRole("button", {
@@ -176,7 +185,7 @@ export const ValidationError: Story = {
   args: {
     autoLoad: false,
     initialStatus: "idle",
-    initialTodos: [activeTodo],
+    initialTodos: [activeTodoFixture],
     initialDraft: " ".repeat(2),
     initialValidationError: "TODOを入力してください",
   },
@@ -186,20 +195,14 @@ export const CreateErrorRecoverable: Story = {
   args: {
     autoLoad: false,
     initialStatus: "idle",
-    initialTodos: [activeTodo, completedTodo],
+    initialTodos: storyTodosFixture,
     initialDraft: "入力を保持するTODO",
   },
   parameters: {
-    msw: {
-      handlers: [
-        http.post(generatedTodoHandlersUrl.collection, () =>
-          HttpResponse.json(
-            { message: "TODOを追加できませんでした" },
-            { status: 500 },
-          ),
-        ),
-      ],
-    },
+    todoHandlerFactory: () => [
+      createTodoErrorHandler(),
+      ...createTodoMockHandlers(storyTodosFixture),
+    ],
   },
   play: async ({ canvas, userEvent }) => {
     const createButton = await canvas.findByRole("button", { name: "追加" });
@@ -214,23 +217,17 @@ export const ToggleError: Story = {
   args: {
     autoLoad: false,
     initialStatus: "idle",
-    initialTodos: [activeTodo, completedTodo],
+    initialTodos: storyTodosFixture,
   },
   parameters: {
-    msw: {
-      handlers: [
-        http.patch(generatedTodoHandlersUrl.detail, () =>
-          HttpResponse.json(
-            { message: "完了状態を更新できませんでした" },
-            { status: 500 },
-          ),
-        ),
-      ],
-    },
+    todoHandlerFactory: () => [
+      createUpdateTodoErrorHandler(),
+      ...createTodoMockHandlers(storyTodosFixture),
+    ],
   },
   play: async ({ canvas, userEvent }) => {
     const checkbox = await canvas.findByRole("checkbox", {
-      name: `${activeTodo.title}を完了にする`,
+      name: `${activeTodoFixture.title}を完了にする`,
     });
     await userEvent.click(checkbox);
 
@@ -243,23 +240,17 @@ export const DeleteError: Story = {
   args: {
     autoLoad: false,
     initialStatus: "idle",
-    initialTodos: [activeTodo, completedTodo],
+    initialTodos: storyTodosFixture,
   },
   parameters: {
-    msw: {
-      handlers: [
-        http.delete(generatedTodoHandlersUrl.detail, () =>
-          HttpResponse.json(
-            { message: "TODOを削除できませんでした" },
-            { status: 500 },
-          ),
-        ),
-      ],
-    },
+    todoHandlerFactory: () => [
+      createDeleteTodoErrorHandler(),
+      ...createTodoMockHandlers(storyTodosFixture),
+    ],
   },
   play: async ({ canvas, userEvent }) => {
     const deleteButton = await canvas.findByRole("button", {
-      name: `削除: ${activeTodo.title}`,
+      name: `削除: ${activeTodoFixture.title}`,
     });
     await userEvent.click(deleteButton);
 
@@ -278,7 +269,7 @@ export const Mobile: Story = {
   args: {
     autoLoad: false,
     initialStatus: "idle",
-    initialTodos: [activeTodo, completedTodo],
+    initialTodos: [activeTodoFixture, completedTodoFixture],
   },
   parameters: {
     viewport: {
@@ -291,6 +282,6 @@ export const LongList: Story = {
   args: {
     autoLoad: false,
     initialStatus: "idle",
-    initialTodos: longListTodos,
+    initialTodos: longListTodosFixture,
   },
 };

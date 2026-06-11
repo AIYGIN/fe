@@ -1,18 +1,11 @@
 import type { Preview } from "@storybook/nextjs-vite";
 
-// mswの設定追加
 import { initialize, mswLoader } from "msw-storybook-addon";
-import { sampleHandlers } from "../src/lib/msw/handlers/sample";
-import { todoHandlers } from "../src/lib/msw/handlers/todos";
+import { createTodoMockHandlers } from "../src/apis/todos.fixtures";
 
-// mswの初期化
-initialize({ onUnhandledRequest: "warn" }, [
-  ...sampleHandlers,
-  ...todoHandlers,
-]);
+initialize({ onUnhandledRequest: "warn" }, createTodoMockHandlers());
 
 const preview: Preview = {
-  // mswの設定追加
   loaders: [mswLoader],
   parameters: {
     controls: {
