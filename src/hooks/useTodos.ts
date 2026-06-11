@@ -1,18 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  createTodo,
-  deleteTodo,
-  fetchTodos,
-  updateTodo,
-} from "@/lib/api/todos";
-import type { Todo } from "@/types/todo";
+import type { TodoDto } from "@/apis/generated/model";
+import { createTodo, deleteTodo, fetchTodos, updateTodo } from "@/apis/todos";
 
 type LoadStatus = "idle" | "loading" | "error";
 
 type UseTodosOptions = {
-  initialTodos: Todo[];
+  initialTodos: TodoDto[];
   initialStatus: LoadStatus;
   initialError: string;
   autoLoad: boolean;
@@ -98,7 +93,7 @@ export function useTodos({
     }
   };
 
-  const toggleTodo = async (todo: Todo) => {
+  const toggleTodo = async (todo: TodoDto) => {
     if (pendingToggleIds.has(todo.id)) {
       return;
     }
@@ -130,7 +125,7 @@ export function useTodos({
     }
   };
 
-  const removeTodos = async (targets: Todo[]) => {
+  const removeTodos = async (targets: TodoDto[]) => {
     const targetIds = targets
       .map((todo) => todo.id)
       .filter((id) => !pendingDeleteIds.has(id));
@@ -218,7 +213,7 @@ export function useTodos({
 
   const clearCreateError = () => setCreateError("");
 
-  const clearDeleteErrors = (targets: Todo[]) => {
+  const clearDeleteErrors = (targets: TodoDto[]) => {
     setDeleteErrors((current) => {
       const next = { ...current };
       for (const todo of targets) {

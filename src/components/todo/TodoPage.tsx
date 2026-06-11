@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { TodoDto } from "@/apis/generated/model";
 import { useTodos } from "@/hooks/useTodos";
-import type { Todo, TodoFilter } from "@/types/todo";
+import type { TodoFilter } from "@/types/todo";
 import styles from "./TodoPage.module.css";
 
 type TodoPageProps = {
-  initialTodos?: Todo[];
+  initialTodos?: TodoDto[];
   initialFilter?: TodoFilter;
   initialStatus?: "idle" | "loading" | "error";
   initialError?: string;
@@ -16,8 +17,8 @@ type TodoPageProps = {
 };
 
 type DeleteRequest =
-  | { kind: "single"; todos: [Todo] }
-  | { kind: "bulk"; todos: Todo[] };
+  | { kind: "single"; todos: [TodoDto] }
+  | { kind: "bulk"; todos: TodoDto[] };
 
 const filterLabels: Record<TodoFilter, string> = {
   all: "すべて",
@@ -230,9 +231,7 @@ export function TodoPage({
       <div className={styles.container}>
         <header className={styles.header}>
           <div className={styles.heading}>
-            <p className={styles.intro}>
-              TODOリスト
-            </p>
+            <h1 className={styles.intro}>TODOリスト</h1>
           </div>
           <output className={styles.summary} aria-label="未完了件数">
             <span className={styles.summaryValue}>{counts.active}</span>

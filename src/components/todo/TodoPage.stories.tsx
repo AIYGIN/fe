@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { delay, HttpResponse, http } from "msw";
 import { expect } from "storybook/test";
+import { generatedTodoHandlersUrl } from "@/lib/msw/handlers/todos";
 import { TodoPage } from "./TodoPage";
 
 const activeTodo = {
@@ -41,8 +42,17 @@ export const Default: Story = {};
 export const Empty: Story = {
   parameters: {
     msw: {
-      handlers: [http.get("*/api/todos", () => HttpResponse.json([]))],
+      handlers: [
+        http.get(generatedTodoHandlersUrl.collection, () =>
+          HttpResponse.json([]),
+        ),
+      ],
     },
+  },
+  play: async ({ canvas }) => {
+    await expect(
+      await canvas.findByText("表示するTODOはありません"),
+    ).toBeInTheDocument();
   },
 };
 
@@ -50,12 +60,15 @@ export const Loading: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("*/api/todos", async () => {
+        http.get(generatedTodoHandlersUrl.collection, async () => {
           await delay("infinite");
           return HttpResponse.json([]);
         }),
       ],
     },
+  },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText("読み込み中")).toBeInTheDocument();
   },
 };
 
@@ -64,11 +77,16 @@ export const FetchError: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.get("*/api/todos", () =>
+        http.get(generatedTodoHandlersUrl.collection, () =>
           HttpResponse.json({ message: "failed" }, { status: 500 }),
         ),
       ],
     },
+  },
+  play: async ({ canvas }) => {
+    await expect(
+      await canvas.findByText("TODO一覧を取得できませんでした"),
+    ).toBeInTheDocument();
   },
 };
 
@@ -174,7 +192,7 @@ export const CreateErrorRecoverable: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.post("*/api/todos", () =>
+        http.post(generatedTodoHandlersUrl.collection, () =>
           HttpResponse.json(
             { message: "TODOを追加できませんでした" },
             { status: 500 },
@@ -201,7 +219,7 @@ export const ToggleError: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.patch("*/api/todos/:id", () =>
+        http.patch(generatedTodoHandlersUrl.detail, () =>
           HttpResponse.json(
             { message: "完了状態を更新できませんでした" },
             { status: 500 },
@@ -230,7 +248,7 @@ export const DeleteError: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.delete("*/api/todos/:id", () =>
+        http.delete(generatedTodoHandlersUrl.detail, () =>
           HttpResponse.json(
             { message: "TODOを削除できませんでした" },
             { status: 500 },

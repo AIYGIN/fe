@@ -99,7 +99,7 @@ Reactロジックの再利用を管理する。
 
 - UIコンポーネントの定義
 - pure function（→ libへ）
-- APIクライアント（→ libへ）
+- APIクライアント（→ apisへ）
 
 ---
 
@@ -122,76 +122,57 @@ Reactロジックの再利用を管理する。
 
 #### 役割
 
-- APIクライアント
-- APIエンドポイント定義
 - utils
 - constants
 - validators
-- MSW
 
 ---
 
-### `src/lib/api`
+### `src/apis`
 
 API関連処理を管理する。
 
 #### 構成例
 
-- client.ts（fetchラッパー）
-- endpoints.ts（エンドポイント定義）
-- users.ts（ドメイン別API）
-- auth.ts
+- generated/（Orval生成物）
+- users.ts（画面向けAPIラッパー）
+- auth.ts（画面向けAPIラッパー）
 
 ---
 
-### `src/lib/api/endpoints.ts`
+### `src/apis/generated`
 
-APIエンドポイントを一元管理する。
+OpenAPI定義からOrvalで生成されたAPIクライアント、型、mockを管理する。
 
 #### 目的
 
-- URLの散在防止
-- 変更の局所化
-- API呼び出しの統一
+- OpenAPI定義との同期
+- API型の手書き削減
+- Storybook / test 用 mock の生成
 
-#### 例
+#### 生成元
 
-```tsx
-export const endpoints = {
-  users: "/api/users",
-  userDetail: (id: string) => `/api/users/${id}`,
-  login: "/api/auth/login",
-};
+```txt
+http://localhost:3001/docs-json
+```
+
+#### 生成コマンド
+
+```bash
+pnpm api:generate
 ```
 
 #### 禁止事項
 
 - コンポーネント内でURLを直接記述すること
 - feature/component側でのエンドポイント定義
+- 生成物を手動編集すること
 
 ---
 
 ### `src/lib/msw`
 
-MSW の設定および共通基盤。
-
----
-
-### `src/lib/msw/handlers`
-
-APIごとの mock handler を管理する。
-
-- users.ts
-- auth.ts
-- posts.ts
-
----
-
-### `src/lib/msw/setup/server.ts`
-
-MSW server 設定ファイル。
-
-handler をまとめて読み込む。
+既存の手書きMSW設定。Orval生成mockへ移行するまでの暫定配置とする。
 
 ---
 

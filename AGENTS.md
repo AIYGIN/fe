@@ -15,7 +15,7 @@
 - Storybook Driven Development（SDD）
 - Test Driven Development（TDD）
 - コンポーネント中心設計
-- MSWによるAPIモック前提開発
+- Orval生成APIクライアント・mock前提開発
 - マルチエージェント分業開発
 
 ---
@@ -114,7 +114,7 @@ chore/update-dependencies
 - unit / integration / e2e テスト作成と実行
 - APIレスポンス仕様の定義
 - モックデータの設計
-- MSWシナリオの定義（成功・失敗・loadingなど）
+- Orval生成mockシナリオの定義（成功・失敗・loadingなど）
 
 #### 禁止事項
 - 実装コードの作成
@@ -133,7 +133,7 @@ chore/update-dependencies
 - `.stories.tsx` に基づいたUI実装
 - `.test.tsx` のテストを通すための最小実装
 - Storybookで確認可能な状態の構築
-- 既存MSWシナリオ前提での実装
+- Orval生成mockシナリオ前提での実装
 
 #### 原則
 - 最小実装を優先する
@@ -143,7 +143,7 @@ chore/update-dependencies
 #### 禁止事項
 - 仕様の変更
 - テストの書き換え
-- MSWシナリオの変更
+- mockシナリオの変更
 - 過剰設計
 
 ---

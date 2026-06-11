@@ -9,6 +9,7 @@
     "lint": "biome check",
     "format": "biome format --write",
     "check": "biome check --write",
+    "api:generate": "orval --config orval.config.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test": "vitest run --project unit --reporter=verbose",
@@ -28,6 +29,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
     "@chromatic-com/storybook": "^5.2.1",
+    "@faker-js/faker": "^10.4.0",
     "@pandacss/dev": "^0.47",
     "@playwright/test": "^1.60.0",
     "@storybook/addon-a11y": "^10.4.1",
@@ -48,6 +50,7 @@
     "lefthook": "^2.1.8",
     "msw": "^2.14.6",
     "msw-storybook-addon": "^2.0.7",
+    "orval": "^8.15.0",
     "playwright": "^1.60.0",
     "storybook": "^10.4.1",
     "typescript": "^5",
