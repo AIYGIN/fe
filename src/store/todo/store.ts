@@ -50,12 +50,14 @@ const getErrorMessage = (error: unknown, fallback: string) => {
   if (error instanceof Error && error.message) {
     return error.message;
   }
+
   if (typeof error === "object" && error !== null) {
     const message = (error as { message?: unknown }).message;
     if (typeof message === "string" && message.length > 0) {
       return message;
     }
   }
+
   return fallback;
 };
 
@@ -66,6 +68,7 @@ const extractErrorMessage = (data: unknown): string | undefined => {
       return message;
     }
   }
+
   return undefined;
 };
 
@@ -76,6 +79,7 @@ const assertSuccess = <T>(
   if (okStatuses.includes(response.status)) {
     return response.data as T;
   }
+
   throw new Error(
     extractErrorMessage(response.data) ?? "TODO API request failed",
   );
@@ -89,6 +93,7 @@ const applyMutations = (todos: TodoDto[], mutations: TodoMutation[]) =>
         ...current.filter((todo) => todo.id !== mutation.todo.id),
       ];
     }
+
     if (mutation.type === "update") {
       return current.map((todo) =>
         todo.id === mutation.todo.id ? mutation.todo : todo,
@@ -142,6 +147,7 @@ export const createTodoApiStore = ({
 
         const loadRevision = mutationRevision;
         set({ status: "loading", loadError: "" });
+
         loadRequest = (async () => {
           try {
             const todos = assertSuccess<TodoDto[]>(
@@ -150,6 +156,7 @@ export const createTodoApiStore = ({
             const laterMutations = mutationHistory.filter(
               (mutation) => mutation.revision > loadRevision,
             );
+
             set({
               todos: applyMutations(todos, laterMutations),
               status: "idle",
@@ -164,6 +171,7 @@ export const createTodoApiStore = ({
             loadRequest = null;
           }
         })();
+
         return loadRequest;
       },
       addTodo: async (request) => {
@@ -172,6 +180,7 @@ export const createTodoApiStore = ({
         }
 
         set({ createError: "", isCreating: true });
+
         try {
           const created = assertSuccess<TodoDto>(
             await todoControllerCreateTodo(request),
@@ -198,6 +207,7 @@ export const createTodoApiStore = ({
           toggleErrors: { ...state.toggleErrors, [todo.id]: "" },
           pendingToggleIds: new Set(state.pendingToggleIds).add(todo.id),
         }));
+
         try {
           const request: UpdateTodoRequestDto = {
             completed: !todo.completed,
@@ -205,12 +215,15 @@ export const createTodoApiStore = ({
           const updated = assertSuccess<TodoDto>(
             await todoControllerUpdateTodo(todo.id, request),
           );
+
           recordMutation({ type: "update", todo: updated });
+
           set((state) => ({
             todos: state.todos.map((item) =>
               item.id === updated.id ? updated : item,
             ),
           }));
+
           announce(
             updated.completed
               ? "TODOを完了にしました"
@@ -246,10 +259,12 @@ export const createTodoApiStore = ({
         set((state) => {
           const deleteErrors = { ...state.deleteErrors };
           const pendingDeleteIds = new Set(state.pendingDeleteIds);
+
           for (const id of targetIds) {
             deleteErrors[id] = "";
             pendingDeleteIds.add(id);
           }
+
           return { deleteErrors, pendingDeleteIds };
         });
 
@@ -259,12 +274,14 @@ export const createTodoApiStore = ({
             return id;
           }),
         );
+
         const succeededIds: string[] = [];
         const failedIds: string[] = [];
         const failedReasons: Record<string, unknown> = {};
 
         results.forEach((result, index) => {
           const id = targetIds[index];
+
           if (result.status === "fulfilled") {
             succeededIds.push(id);
           } else {
@@ -281,18 +298,22 @@ export const createTodoApiStore = ({
         if (succeededIds.length > 0) {
           recordMutation({ type: "delete", ids: succeededIds });
         }
+
         set((state) => {
           const deletedIds = new Set(succeededIds);
           const deleteErrors = { ...state.deleteErrors };
           const pendingDeleteIds = new Set(state.pendingDeleteIds);
+
           for (const id of failedIds) {
             const message = getErrorMessage(failedReasons[id], fallbackMessage);
             deleteErrors[id] =
               message === "TODO API request failed" ? fallbackMessage : message;
           }
+
           for (const id of targetIds) {
             pendingDeleteIds.delete(id);
           }
+
           return {
             todos:
               succeededIds.length === 0
@@ -310,6 +331,7 @@ export const createTodoApiStore = ({
               : `${succeededIds.length}件のTODOを削除しました`,
           );
         }
+
         return { succeededIds, failedIds };
       },
       clearCreateError: () => set({ createError: "" }),
@@ -318,9 +340,11 @@ export const createTodoApiStore = ({
           const deleteErrors = { ...state.deleteErrors };
           const ids =
             targets?.map((todo) => todo.id) ?? Object.keys(deleteErrors);
+
           for (const id of ids) {
             deleteErrors[id] = "";
           }
+
           return { deleteErrors };
         });
       },
@@ -330,5 +354,6 @@ export const createTodoApiStore = ({
   if (autoLoad) {
     void store.getState().loadTodos();
   }
+
   return store;
 };

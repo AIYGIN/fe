@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useStore } from "zustand";
 import type { TodoDto } from "@/apis/generated/model";
-import { createTodoApiStore } from "@/components/todo/todo-api-store";
+import { createTodoApiStore } from "@/store/todo/store";
 
 type LoadStatus = "idle" | "loading" | "error";
 

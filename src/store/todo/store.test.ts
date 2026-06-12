@@ -15,7 +15,7 @@ import {
   getTodoControllerUpdateTodoMockHandler,
 } from "@/apis/generated/todos/todos.msw";
 import { todoMockServer } from "@/apis/todos.mock-server";
-import { createTodoApiStore } from "./todo-api-store";
+import { createTodoApiStore } from "./store";
 
 const activeTodoFixture: TodoDto = {
   id: "todo-active",

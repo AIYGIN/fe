@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { TodoDto } from "@/apis/generated/model";
-import { useTodos } from "@/hooks/useTodos";
+import { useTodos } from "@/hooks/todo/useTodos";
 import type { TodoFilter } from "@/types/todo";
 import styles from "./TodoPage.module.css";
 

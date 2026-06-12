@@ -22,6 +22,7 @@ tests は振る舞い契約、
 - APIクライアント、型、mockは Orval 生成物を利用し、`src/apis/generated` 配下を手動編集しない。
 - API状態とUI状態を分離し、必要な最小スコープへ配置する。
 - Zustand等のstoreを利用する場合は、feature / page専用の独立store instanceとし、SSR request、Story、test間で共有しない。
+- feature / page専用storeを作成する場合は `src/store/<feature>` に配置し、UI component配下へAPI storeを置かない。
 - loading / error / mutation pending / 重複防止をStoryとtestで定義する。
 - 状態管理・データ取得技術は無条件に禁止・追加せず、現行採用技術とIssue要件に従う。
 
@@ -43,6 +44,7 @@ tests は振る舞い契約、
 - `.stories.tsx` および `.test.tsx` のレビュー完了後、それらを満たすように実装すること。
   - 実装の際は `.test.tsx` を GREEN にすること。
   - API利用時は、状態が必要な最小スコープにあり、store instanceが利用境界ごとに独立していること。
+  - feature / page専用storeを作成する場合は `src/store/<feature>` に配置し、UI component配下へAPI storeを置かない。
   - 実装完了後、Storybook で確認可能な状態にすること。
 - 実装完了後、Storybook 上で確認およびレビューを行うこと。
 - API利用時のレビューでは、状態分類、Orval生成物の利用、API/UI状態の分離、非同期競合防止を確認すること。
@@ -64,6 +66,7 @@ tests は振る舞い契約、
   - ページコンポーネントは原則としてサーバーコンポーネントで作成すること。
   - クライアント側で状態共有が必要な場合のみクライアントコンポーネント化を許可する。
   - client storeが必要な場合はfeature / page専用とし、Story、test、SSR requestごとに独立したinstanceを生成すること。
+  - feature / page専用storeを作成する場合は `src/store/<feature>` に配置すること。
   - 実装時は `.test.tsx` を GREEN にすること。
   - 実装完了後、Storybook で確認可能な状態にすること。
 - 実装完了後、Storybook 上で確認およびレビューを行うこと。

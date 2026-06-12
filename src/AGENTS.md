@@ -66,7 +66,8 @@ APIを利用する機能の Story、test、実装、レビューでは、`docs/r
 ### 状態管理
 
 - 状態管理の判断は `docs/rules/state-management.md` に従う
-- feature / page専用store：利用するfeatureまたはpageの近くに配置する
+- feature / page専用store：原則として `src/store/<feature>` に配置する
+- storeはmodule-level singletonにせず、store作成関数を公開して利用境界ごとにinstanceを生成する
 - `src/contexts`：明確なアプリ横断状態に限定する
 - `src/hooks`：Reactロジック
 
