@@ -11,5 +11,12 @@ const config: StorybookConfig = {
   ],
   framework: "@storybook/nextjs-vite",
   staticDirs: ["../public"],
+  viteFinal: async (config) => ({
+    ...config,
+    optimizeDeps: {
+      ...config.optimizeDeps,
+      include: [...(config.optimizeDeps?.include ?? []), "@faker-js/faker"],
+    },
+  }),
 };
 export default config;

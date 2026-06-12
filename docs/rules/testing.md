@@ -97,6 +97,7 @@ selector の優先順位は以下とする：
 
 API利用時は MSW を利用すること。
 
+- Orval生成mockを優先する
 - mock を再利用可能にする
 - Storybook と test で共有可能にする
 - Success / Error / Loading を切り替え可能にする
@@ -105,8 +106,9 @@ API利用時は MSW を利用すること。
 
 ## MSW 利用ルール
 
-- handler は `src/lib/msw/handlers` に配置する
-- `src/lib/msw/setup/server.ts` に登録する
+- Orval生成handlerは `src/apis/generated` 配下の生成物を利用し、手動編集しない
+- 追加handlerは `src/apis/generated` の Orval 生成mock handler を直接利用する
+- test用server setupは `src/apis/*.mock-server.ts` に配置する
 - 実API通信を行ってはいけない
 
 ---

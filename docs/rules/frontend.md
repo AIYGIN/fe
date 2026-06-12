@@ -137,6 +137,7 @@ API関連処理を管理する。
 - generated/（Orval生成物）
 - users.ts（画面向けAPIラッパー）
 - auth.ts（画面向けAPIラッパー）
+- todos.mock-browser.ts / todos.mock-server.ts（環境別MSW setup）
 
 ---
 
@@ -170,9 +171,11 @@ pnpm api:generate
 
 ---
 
-### `src/lib/msw`
+### MSW mock
 
-既存の手書きMSW設定。Orval生成mockへ移行するまでの暫定配置とする。
+- Orval生成mockは `src/apis/generated` 配下の生成物を利用し、手動編集しない
+- 追加handlerは `src/apis/generated` の Orval 生成mock handler を直接利用する
+- browser / test用setupは `src/apis/*.mock-browser.ts` / `src/apis/*.mock-server.ts` に配置する
 
 ---
 

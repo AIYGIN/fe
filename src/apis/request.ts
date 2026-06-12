@@ -12,10 +12,25 @@ export const request = async <T>(
     credentials: "include",
     signal: AbortSignal.timeout(5_000),
   });
+
   const body = [204, 205, 304].includes(response.status)
     ? null
     : await response.text();
-  const data = body ? JSON.parse(body) : undefined;
+
+  let data: unknown;
+  if (body) {
+    data = JSON.parse(body);
+  } else if (
+    response.headers.get("content-type")?.includes("application/json")
+  ) {
+    try {
+      data = await response.clone().json();
+    } catch {
+      data = undefined;
+    }
+  } else {
+    data = undefined;
+  }
 
   return {
     data,

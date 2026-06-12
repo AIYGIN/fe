@@ -5,57 +5,57 @@
  * Frontend 向け BFF API
  * OpenAPI spec version: 1.0
  */
+import type {
+  UserDto
+} from '../model';
 
-import { request } from "../../request";
-import type { UserDto } from "../model";
+import { request } from '../../request';
 
 export type userControllerGetUserResponse200 = {
-  data: UserDto;
-  status: 200;
-};
+  data: UserDto
+  status: 200
+}
 
 export type userControllerGetUserResponse400 = {
-  data: void;
-  status: 400;
-};
+  data: void
+  status: 400
+}
 
 export type userControllerGetUserResponse500 = {
-  data: void;
-  status: 500;
-};
+  data: void
+  status: 500
+}
 
-export type userControllerGetUserResponseSuccess =
-  userControllerGetUserResponse200 & {
-    headers: Headers;
-  };
-export type userControllerGetUserResponseError = (
-  | userControllerGetUserResponse400
-  | userControllerGetUserResponse500
-) & {
+export type userControllerGetUserResponseSuccess = (userControllerGetUserResponse200) & {
+  headers: Headers;
+};
+export type userControllerGetUserResponseError = (userControllerGetUserResponse400 | userControllerGetUserResponse500) & {
   headers: Headers;
 };
 
-export type userControllerGetUserResponse =
-  | userControllerGetUserResponseSuccess
-  | userControllerGetUserResponseError;
+export type userControllerGetUserResponse = (userControllerGetUserResponseSuccess | userControllerGetUserResponseError)
 
-export const getUserControllerGetUserUrl = (userId: string) => {
-  return `/users/${userId}`;
-};
+export const getUserControllerGetUserUrl = (userId: unknown,) => {
+
+
+
+
+  return `/users/${userId}`
+}
 
 /**
  * 指定したユーザーIDに紐づくユーザー情報を取得する。
  * @summary ユーザー取得
  */
-export const userControllerGetUser = async (
-  userId: string,
-  options?: RequestInit,
-): Promise<userControllerGetUserResponse> => {
-  return request<userControllerGetUserResponse>(
-    getUserControllerGetUserUrl(userId),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
+export const userControllerGetUser = async (userId: unknown, options?: RequestInit): Promise<userControllerGetUserResponse> => {
+
+  return request<userControllerGetUserResponse>(getUserControllerGetUserUrl(userId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
