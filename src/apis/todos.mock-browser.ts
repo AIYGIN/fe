@@ -1,3 +1,6 @@
+import { setupWorker } from "msw/browser";
+import { getTodosMock } from "./generated/todos/todos.msw";
+
 let workerPromise: Promise<void> | undefined;
 
 export const enableTodoMocking = async () => {
@@ -10,11 +13,8 @@ export const enableTodoMocking = async () => {
     return;
   }
 
-  workerPromise ??= Promise.all([
-    import("msw/browser"),
-    import("./todos.fixtures"),
-  ]).then(async ([{ setupWorker }, { createTodoMockHandlers }]) => {
-    await setupWorker(...createTodoMockHandlers()).start({
+  workerPromise ??= Promise.resolve().then(async () => {
+    await setupWorker(...getTodosMock()).start({
       onUnhandledRequest: "bypass",
     });
   });

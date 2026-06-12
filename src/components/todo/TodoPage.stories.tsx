@@ -1,26 +1,78 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { RequestHandler } from "msw";
+import { delay, HttpResponse, http } from "msw";
 import { mswLoader } from "msw-storybook-addon";
 import { expect } from "storybook/test";
+import type { TodoDto } from "@/apis/generated/model";
 import {
-  activeTodoFixture,
-  completedTodoFixture,
-  createDeleteTodoErrorHandler,
-  createEmptyTodosHandler,
-  createFetchTodosErrorHandler,
-  createLoadingTodosHandler,
-  createTodoErrorHandler,
-  createTodoMockHandlers,
-  createUpdateTodoErrorHandler,
-  defaultTodosFixture,
-  longListTodosFixture,
-  storyTodosFixture,
-} from "@/apis/todos.fixtures";
+  getTodoControllerCreateTodoUrl,
+  getTodoControllerDeleteTodoUrl,
+  getTodoControllerGetTodosUrl,
+  getTodoControllerUpdateTodoUrl,
+} from "@/apis/generated/todos/todos";
+import { getTodoControllerGetTodosMockHandler } from "@/apis/generated/todos/todos.msw";
 import { TodoPage } from "./TodoPage";
 
 type TodoStoryParameters = {
   todoHandlerFactory?: () => RequestHandler[];
 };
+
+const newestTodoFixture: TodoDto = {
+  id: "todo-new",
+  title: "新しいTODO",
+  completed: false,
+  createdAt: "2026-06-05T02:00:00.000Z",
+};
+
+const oldCompletedTodoFixture: TodoDto = {
+  id: "todo-old",
+  title: "完了済みTODO",
+  completed: true,
+  createdAt: "2026-06-05T01:00:00.000Z",
+};
+
+const activeTodoFixture: TodoDto = {
+  id: "story-active",
+  title: "買い物メモを作る",
+  completed: false,
+  createdAt: "2026-06-05T03:00:00.000Z",
+};
+
+const completedTodoFixture: TodoDto = {
+  id: "story-completed",
+  title: "朝のレビューを終える",
+  completed: true,
+  createdAt: "2026-06-05T02:00:00.000Z",
+};
+
+const defaultTodosFixture = [
+  newestTodoFixture,
+  oldCompletedTodoFixture,
+] as const;
+const storyTodosFixture = [activeTodoFixture, completedTodoFixture] as const;
+const longListTodosFixture = Array.from(
+  { length: 24 },
+  (_, index): TodoDto => ({
+    id: `story-long-${index + 1}`,
+    title: `長い一覧のTODO ${String(index + 1).padStart(2, "0")}`,
+    completed: index % 3 === 0,
+    createdAt: new Date(Date.UTC(2026, 5, 5, 1, 59 - index)).toISOString(),
+  }),
+);
+
+const todoErrorFixtures = {
+  fetch: { message: "failed" },
+  create: { message: "TODOを追加できませんでした" },
+  update: { message: "完了状態を更新できませんでした" },
+  delete: { message: "TODOを削除できませんでした" },
+} as const;
+
+const todoMockUrls = {
+  collection: `*${getTodoControllerGetTodosUrl()}`,
+  create: `*${getTodoControllerCreateTodoUrl()}`,
+  update: `*${getTodoControllerUpdateTodoUrl(":id")}`,
+  delete: `*${getTodoControllerDeleteTodoUrl(":id")}`,
+} as const;
 
 const loadTodoHandlers = async (context: Parameters<typeof mswLoader>[0]) => {
   const { todoHandlerFactory } =
@@ -55,7 +107,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   parameters: {
-    todoHandlerFactory: () => createTodoMockHandlers(),
+    todoHandlerFactory: () => [
+      getTodoControllerGetTodosMockHandler(() => defaultTodosFixture),
+    ],
   },
   play: async ({ canvas }) => {
     await expect(
@@ -69,7 +123,7 @@ export const Default: Story = {
 
 export const Empty: Story = {
   parameters: {
-    todoHandlerFactory: () => [createEmptyTodosHandler()],
+    todoHandlerFactory: () => [getTodoControllerGetTodosMockHandler(() => [])],
   },
   play: async ({ canvas }) => {
     await expect(
@@ -80,7 +134,12 @@ export const Empty: Story = {
 
 export const Loading: Story = {
   parameters: {
-    todoHandlerFactory: () => [createLoadingTodosHandler()],
+    todoHandlerFactory: () => [
+      getTodoControllerGetTodosMockHandler(async () => {
+        await delay("infinite");
+        return [];
+      }),
+    ],
   },
   play: async ({ canvas }) => {
     await expect(await canvas.findByText("読み込み中")).toBeInTheDocument();
@@ -90,7 +149,11 @@ export const Loading: Story = {
 export const FetchError: Story = {
   name: "Error",
   parameters: {
-    todoHandlerFactory: () => [createFetchTodosErrorHandler()],
+    todoHandlerFactory: () => [
+      http.get(todoMockUrls.collection, () =>
+        HttpResponse.json(todoErrorFixtures.fetch, { status: 500 }),
+      ),
+    ],
   },
   play: async ({ canvas }) => {
     await expect(
@@ -200,8 +263,10 @@ export const CreateErrorRecoverable: Story = {
   },
   parameters: {
     todoHandlerFactory: () => [
-      createTodoErrorHandler(),
-      ...createTodoMockHandlers(storyTodosFixture),
+      http.post(todoMockUrls.create, () =>
+        HttpResponse.json(todoErrorFixtures.create, { status: 500 }),
+      ),
+      getTodoControllerGetTodosMockHandler(() => storyTodosFixture),
     ],
   },
   play: async ({ canvas, userEvent }) => {
@@ -221,8 +286,10 @@ export const ToggleError: Story = {
   },
   parameters: {
     todoHandlerFactory: () => [
-      createUpdateTodoErrorHandler(),
-      ...createTodoMockHandlers(storyTodosFixture),
+      http.patch(todoMockUrls.update, () =>
+        HttpResponse.json(todoErrorFixtures.update, { status: 500 }),
+      ),
+      getTodoControllerGetTodosMockHandler(() => storyTodosFixture),
     ],
   },
   play: async ({ canvas, userEvent }) => {
@@ -244,8 +311,10 @@ export const DeleteError: Story = {
   },
   parameters: {
     todoHandlerFactory: () => [
-      createDeleteTodoErrorHandler(),
-      ...createTodoMockHandlers(storyTodosFixture),
+      http.delete(todoMockUrls.delete, () =>
+        HttpResponse.json(todoErrorFixtures.delete, { status: 500 }),
+      ),
+      getTodoControllerGetTodosMockHandler(() => storyTodosFixture),
     ],
   },
   play: async ({ canvas, userEvent }) => {

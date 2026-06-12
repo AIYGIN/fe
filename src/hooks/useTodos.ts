@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { TodoDto } from "@/apis/generated/model";
-import { createTodo, deleteTodo, fetchTodos, updateTodo } from "@/apis/todos";
+import {
+  todoControllerCreateTodo,
+  todoControllerDeleteTodo,
+  todoControllerGetTodos,
+  todoControllerUpdateTodo,
+} from "@/apis/generated/todos/todos";
 
 type LoadStatus = "idle" | "loading" | "error";
 
@@ -18,8 +23,41 @@ type RemoveTodosResult = {
   failedIds: string[];
 };
 
-const getErrorMessage = (error: unknown, fallback: string) =>
-  error instanceof Error ? error.message : fallback;
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  if (typeof error === "object" && error !== null) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string" && message.length > 0) {
+      return message;
+    }
+  }
+  return fallback;
+};
+
+const extractErrorMessage = (data: unknown): string | undefined => {
+  if (typeof data === "object" && data !== null) {
+    const message = (data as { message?: unknown }).message;
+    if (typeof message === "string" && message.length > 0) {
+      return message;
+    }
+  }
+  return undefined;
+};
+
+const assertSuccess = <T>(
+  response: { status: number; data: unknown },
+  okStatuses: number[] = [200, 201, 204],
+): T => {
+  if (okStatuses.includes(response.status)) {
+    return response.data as T;
+  }
+
+  throw new Error(
+    extractErrorMessage(response.data) ?? "TODO API request failed",
+  );
+};
 
 export function useTodos({
   initialTodos,
@@ -57,7 +95,7 @@ export function useTodos({
     setLoadError("");
 
     try {
-      const items = await fetchTodos();
+      const items = assertSuccess<TodoDto[]>(await todoControllerGetTodos());
       setTodos(items);
       setStatus("idle");
     } catch {
@@ -81,7 +119,9 @@ export function useTodos({
     setIsCreating(true);
 
     try {
-      const created = await createTodo({ title });
+      const created = assertSuccess<TodoDto>(
+        await todoControllerCreateTodo({ title }),
+      );
       setTodos((current) => [created, ...current]);
       announce("TODOを追加しました");
       return true;
@@ -102,9 +142,11 @@ export function useTodos({
     setPendingToggleIds((current) => new Set(current).add(todo.id));
 
     try {
-      const updated = await updateTodo(todo.id, {
-        completed: !todo.completed,
-      });
+      const updated = assertSuccess<TodoDto>(
+        await todoControllerUpdateTodo(todo.id, {
+          completed: !todo.completed,
+        }),
+      );
       setTodos((current) =>
         current.map((item) => (item.id === updated.id ? updated : item)),
       );
@@ -154,12 +196,13 @@ export function useTodos({
 
     const results = await Promise.allSettled(
       targetIds.map(async (id) => {
-        await deleteTodo(id);
+        await assertSuccess<void>(await todoControllerDeleteTodo(id), [204]);
         return id;
       }),
     );
     const succeededIds: string[] = [];
     const failedIds: string[] = [];
+    const failedReasons: Record<string, unknown> = {};
     const failedMessages: Record<string, string> = {};
 
     results.forEach((result, index) => {
@@ -171,10 +214,18 @@ export function useTodos({
       }
 
       failedIds.push(id);
-      failedMessages[id] = getErrorMessage(
-        result.reason,
-        "TODOを削除できませんでした",
-      );
+      failedReasons[id] = result.reason;
+    });
+
+    const partialDelete = succeededIds.length > 0 && failedIds.length > 0;
+    const fallbackMessage = partialDelete
+      ? "一部のTODOを削除できませんでした"
+      : "TODOを削除できませんでした";
+
+    failedIds.forEach((id) => {
+      const message = getErrorMessage(failedReasons[id], fallbackMessage);
+      failedMessages[id] =
+        message === "TODO API request failed" ? fallbackMessage : message;
     });
 
     if (succeededIds.length > 0) {

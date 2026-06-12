@@ -24,7 +24,7 @@ tests は振る舞い契約、
   - `.test.tsx` ファイルを追加した際は、RED（失敗状態）で作成する。
   - APIを利用している場合はモック化すること。
     - `src/apis/generated` 配下のOrval生成mockを優先し、生成物は手動編集しない。
-    - 共有fixtureと追加handlerは `src/apis/*.fixtures.ts` に配置する。
+    - 追加handlerは `src/apis/generated` の Orval 生成mock handler を直接利用する。
     - test用server setupは `src/apis/*.mock-server.ts` に配置する。
 - `.stories.tsx` および `.test.tsx` のレビュー完了前に実装を開始してはいけない。
 - `.stories.tsx` および `.test.tsx` 作成完了後にレビュー可能状態にすること。

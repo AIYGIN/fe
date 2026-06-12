@@ -4,19 +4,55 @@ import { HttpResponse, http } from "msw";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { TodoDto } from "@/apis/generated/model";
 import {
-  createDeleteTodoErrorHandler,
-  createFetchTodosErrorHandler,
-  createTodoErrorHandler,
-  createTodoMockHandlers,
-  createUpdateTodoErrorHandler,
-  defaultTodosFixture,
-  englishTodoFixture,
-  newestTodoFixture,
-  todoErrorFixtures,
-  todoMockUrls,
-} from "@/apis/todos.fixtures";
+  getTodoControllerCreateTodoUrl,
+  getTodoControllerDeleteTodoUrl,
+  getTodoControllerGetTodosUrl,
+  getTodoControllerUpdateTodoUrl,
+} from "@/apis/generated/todos/todos";
+import {
+  getTodoControllerCreateTodoMockHandler,
+  getTodoControllerDeleteTodoMockHandler,
+  getTodoControllerGetTodosMockHandler,
+  getTodoControllerUpdateTodoMockHandler,
+} from "@/apis/generated/todos/todos.msw";
 import { todoMockServer } from "@/apis/todos.mock-server";
 import { TodoPage } from "./TodoPage";
+
+const newestTodoFixture: TodoDto = {
+  id: "todo-new",
+  title: "新しいTODO",
+  completed: false,
+  createdAt: "2026-06-05T02:00:00.000Z",
+};
+
+const oldCompletedTodoFixture: TodoDto = {
+  id: "todo-old",
+  title: "完了済みTODO",
+  completed: true,
+  createdAt: "2026-06-05T01:00:00.000Z",
+};
+
+const englishTodoFixture: TodoDto = {
+  id: "todo-english",
+  title: "Review Storybook",
+  completed: false,
+  createdAt: "2026-06-05T03:00:00.000Z",
+};
+
+const defaultTodosFixture = [newestTodoFixture, oldCompletedTodoFixture];
+const todoErrorFixtures = {
+  fetch: { message: "failed" },
+  create: { message: "TODOを追加できませんでした" },
+  update: { message: "完了状態を更新できませんでした" },
+  delete: { message: "TODOを削除できませんでした" },
+} as const;
+
+const todoMockUrls = {
+  collection: `*${getTodoControllerGetTodosUrl()}`,
+  create: `*${getTodoControllerCreateTodoUrl()}`,
+  update: `*${getTodoControllerUpdateTodoUrl(":id")}`,
+  delete: `*${getTodoControllerDeleteTodoUrl(":id")}`,
+} as const;
 
 const renderTodoPage = () => {
   render(<TodoPage />);
@@ -30,6 +66,63 @@ const createDeferred = () => {
 
   return { promise, resolve };
 };
+
+const createTodoMockHandlers = (
+  initialTodos: TodoDto[] = defaultTodosFixture,
+) => {
+  let todos = [...initialTodos];
+  let nextCreatedId = 1;
+
+  return [
+    getTodoControllerGetTodosMockHandler(() => todos),
+    getTodoControllerCreateTodoMockHandler(async ({ request }) => {
+      const body = (await request.json()) as { title: string };
+      const todo: TodoDto = {
+        id: `todo-created-${nextCreatedId}`,
+        title: body.title.trim(),
+        completed: false,
+        createdAt: `2026-06-05T04:00:${String(nextCreatedId).padStart(2, "0")}.000Z`,
+      };
+
+      nextCreatedId += 1;
+      todos = [todo, ...todos];
+      return todo;
+    }),
+    getTodoControllerUpdateTodoMockHandler(async ({ params, request }) => {
+      const id = String(params.id);
+      const body = (await request.json()) as { completed: boolean };
+      const target = todos.find((todo) => todo.id === id) ?? newestTodoFixture;
+      const updatedTodo = { ...target, id, completed: body.completed };
+
+      todos = todos.map((todo) => (todo.id === id ? updatedTodo : todo));
+      return updatedTodo;
+    }),
+    getTodoControllerDeleteTodoMockHandler(({ params }) => {
+      const id = String(params.id);
+      todos = todos.filter((todo) => todo.id !== id);
+    }),
+  ];
+};
+
+const createFetchTodosErrorHandler = () =>
+  http.get(todoMockUrls.collection, () =>
+    HttpResponse.json(todoErrorFixtures.fetch, { status: 500 }),
+  );
+
+const createTodoErrorHandler = () =>
+  http.post(todoMockUrls.create, () =>
+    HttpResponse.json(todoErrorFixtures.create, { status: 500 }),
+  );
+
+const createUpdateTodoErrorHandler = () =>
+  http.patch(todoMockUrls.update, () =>
+    HttpResponse.json(todoErrorFixtures.update, { status: 500 }),
+  );
+
+const createDeleteTodoErrorHandler = () =>
+  http.delete(todoMockUrls.delete, () =>
+    HttpResponse.json(todoErrorFixtures.delete, { status: 500 }),
+  );
 
 describe("TodoPage", () => {
   beforeEach(() => {

@@ -1,9 +1,9 @@
 import type { Preview } from "@storybook/nextjs-vite";
 
 import { initialize, mswLoader } from "msw-storybook-addon";
-import { createTodoMockHandlers } from "../src/apis/todos.fixtures";
+import { getTodosMock } from "../src/apis/generated/todos/todos.msw";
 
-initialize({ onUnhandledRequest: "warn" }, createTodoMockHandlers());
+initialize({ onUnhandledRequest: "warn" }, getTodosMock());
 
 const preview: Preview = {
   loaders: [mswLoader],

@@ -1,4 +1,4 @@
 import { setupServer } from "msw/node";
-import { createTodoMockHandlers } from "./todos.fixtures";
+import { getTodosMock } from "./generated/todos/todos.msw";
 
-export const todoMockServer = setupServer(...createTodoMockHandlers());
+export const todoMockServer = setupServer(...getTodosMock());
