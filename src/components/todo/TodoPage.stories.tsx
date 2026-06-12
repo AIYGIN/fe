@@ -10,7 +10,12 @@ import {
   getTodoControllerGetTodosUrl,
   getTodoControllerUpdateTodoUrl,
 } from "@/apis/generated/todos/todos";
-import { getTodoControllerGetTodosMockHandler } from "@/apis/generated/todos/todos.msw";
+import {
+  getTodoControllerCreateTodoMockHandler,
+  getTodoControllerDeleteTodoMockHandler,
+  getTodoControllerGetTodosMockHandler,
+  getTodoControllerUpdateTodoMockHandler,
+} from "@/apis/generated/todos/todos.msw";
 import { TodoPage } from "./TodoPage";
 
 type TodoStoryParameters = {
@@ -43,6 +48,13 @@ const completedTodoFixture: TodoDto = {
   title: "朝のレビューを終える",
   completed: true,
   createdAt: "2026-06-05T02:00:00.000Z",
+};
+
+const secondCompletedTodoFixture: TodoDto = {
+  id: "story-completed-second",
+  title: "週次レポートを提出する",
+  completed: true,
+  createdAt: "2026-06-05T01:00:00.000Z",
 };
 
 const defaultTodosFixture = [
@@ -278,6 +290,31 @@ export const CreateErrorRecoverable: Story = {
   },
 };
 
+export const CreatePending: Story = {
+  args: {
+    autoLoad: false,
+    initialStatus: "idle",
+    initialTodos: storyTodosFixture,
+    initialDraft: "作成中のTODO",
+  },
+  parameters: {
+    todoHandlerFactory: () => [
+      getTodoControllerCreateTodoMockHandler(async () => {
+        await delay("infinite");
+        return activeTodoFixture;
+      }),
+    ],
+  },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(await canvas.findByRole("button", { name: "追加" }));
+
+    const pendingButton = await canvas.findByRole("button", {
+      name: "追加中...",
+    });
+    await expect(pendingButton).toBeDisabled();
+  },
+};
+
 export const ToggleError: Story = {
   args: {
     autoLoad: false,
@@ -300,6 +337,31 @@ export const ToggleError: Story = {
 
     const alert = await canvas.findByRole("alert");
     await expect(alert).toHaveTextContent("完了状態を更新できませんでした");
+  },
+};
+
+export const TogglePending: Story = {
+  args: {
+    autoLoad: false,
+    initialStatus: "idle",
+    initialTodos: storyTodosFixture,
+  },
+  parameters: {
+    todoHandlerFactory: () => [
+      getTodoControllerUpdateTodoMockHandler(async () => {
+        await delay("infinite");
+        return { ...activeTodoFixture, completed: true };
+      }),
+    ],
+  },
+  play: async ({ canvas, userEvent }) => {
+    const checkbox = await canvas.findByRole("checkbox", {
+      name: `${activeTodoFixture.title}を完了にする`,
+    });
+    await userEvent.click(checkbox);
+
+    await expect(checkbox).toBeDisabled();
+    await expect(await canvas.findByText("更新中...")).toBeInTheDocument();
   },
 };
 
@@ -331,6 +393,77 @@ export const DeleteError: Story = {
     const alert = await canvas.findByRole("alert");
     await expect(alert).toHaveTextContent("TODOを削除できませんでした");
     await expect(dialog).toBeInTheDocument();
+  },
+};
+
+export const DeletePending: Story = {
+  args: {
+    autoLoad: false,
+    initialStatus: "idle",
+    initialTodos: storyTodosFixture,
+  },
+  parameters: {
+    todoHandlerFactory: () => [
+      getTodoControllerDeleteTodoMockHandler(async () => {
+        await delay("infinite");
+      }),
+    ],
+  },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      await canvas.findByRole("button", {
+        name: `削除: ${activeTodoFixture.title}`,
+      }),
+    );
+    await userEvent.click(
+      await canvas.findByRole("button", { name: "削除する" }),
+    );
+
+    const pendingButton = await canvas.findByRole("button", {
+      name: "削除中...",
+    });
+    await expect(pendingButton).toBeDisabled();
+    await expect(
+      await canvas.findByRole("button", { name: "キャンセル" }),
+    ).toBeDisabled();
+  },
+};
+
+export const BulkDeletePending: Story = {
+  args: {
+    autoLoad: false,
+    initialStatus: "idle",
+    initialTodos: [
+      activeTodoFixture,
+      completedTodoFixture,
+      secondCompletedTodoFixture,
+    ],
+  },
+  parameters: {
+    todoHandlerFactory: () => [
+      getTodoControllerDeleteTodoMockHandler(async () => {
+        await delay("infinite");
+      }),
+    ],
+  },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      await canvas.findByRole("button", {
+        name: "完了済みを一括削除（2件）",
+      }),
+    );
+
+    const confirmButton = await canvas.findByRole("button", {
+      name: "2件を削除する",
+    });
+    const cancelButton = await canvas.findByRole("button", {
+      name: "キャンセル",
+    });
+    await userEvent.click(confirmButton);
+
+    await expect(confirmButton).toBeDisabled();
+    await expect(confirmButton).toHaveTextContent("削除中...");
+    await expect(cancelButton).toBeDisabled();
   },
 };
 

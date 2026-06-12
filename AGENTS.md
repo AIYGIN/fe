@@ -219,6 +219,21 @@ src/AGENTS.md
 - UI実装ルール：`docs/rules/ui.md`
 - テストルール：`docs/rules/testing.md`
 - フロントエンド開発の実装ルール：`docs/rules/frontend.md`
+- 状態管理ルール：`docs/rules/state-management.md`
+
+APIを利用する機能の Story、test、実装、レビューでは、`docs/rules/state-management.md` を必ず参照し、状態分類と管理スコープを確認すること。
+
+### ルールの優先順位
+
+フロントエンド開発では以下の優先順位で適用する：
+
+1. `AGENTS.md`
+2. `src/AGENTS.md`
+3. `docs/rules/frontend.md`
+4. `docs/rules/state-management.md`
+5. `docs/rules/ui.md`
+6. `docs/rules/testing.md`
+7. `.codex/workflows/sdd_flow.md`
 
 ---
 
