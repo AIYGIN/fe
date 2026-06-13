@@ -114,7 +114,56 @@ tasksは必ず以下を満たす：
 
 ---
 
-## 2-5 acceptance_criteria
+## 2-5 component_design
+
+UIを含むIssueでは必須とする。
+
+- 最初に既存コンポーネントを調査し、利用できる場合は新規作成せず再利用する
+- 新規・既存を問わず、Issueで利用するコンポーネントを列挙する
+- 記載項目は以下の3項目だけに限定する
+  - コンポーネント名
+  - パス
+  - Props
+- Propsがない場合は `なし` と記載する
+- ロジック、内部状態、描画詳細、スタイル仕様は記載しない
+- UIを含まない場合は `該当なし` と記載する
+
+記載例：
+
+```md
+| コンポーネント名 | パス | Props |
+| --- | --- | --- |
+| TodoTemplate | src/components/templates/Todo/index.tsx | `enableBrowserMock?: boolean` |
+| Button（既存利用） | src/components/common/Button/index.tsx | `children`, `onClick`, `disabled?` |
+```
+
+---
+
+## 2-6 store_design
+
+API状態または共有状態を扱うIssueでは必須とする。
+
+- 最初に既存Storeとhooksを調査し、利用できる場合は新規Storeを作成せず既存Storeを利用する
+- `利用方針` に `既存Storeを利用`、`既存Storeを拡張`、`新規Storeを作成` のいずれかを明記する
+- Storeごとに以下だけを端的に記載する
+  - Store名とパス
+  - state: 状態名と型または役割
+  - actions: 関数名と処理の要約
+- actionの内部実装や詳細な処理手順は記載しない
+- Storeが不要な場合は `該当なし（ローカルstateを利用）` と記載する
+
+記載例：
+
+```md
+- 利用方針: 既存Storeを拡張
+- Store: `todoApiStore` (`src/stores/todo/store.ts`)
+- state: `todos: TodoDto[]`, `status: LoadStatus`
+- actions: `loadTodos(): 一覧取得`, `addTodo(input): TODO追加`
+```
+
+---
+
+## 2-7 acceptance_criteria
 
 - 「できること」で記述
 - 必ずテスト可能であること
@@ -125,7 +174,7 @@ tasksは必ず以下を満たす：
 
 ---
 
-## 2-6 notes
+## 2-8 notes
 
 - 技術制約
 - 依存関係
@@ -196,3 +245,5 @@ Issueタイトルは以下のルールで生成する
 - 抽象名詞が存在しない
 - 設計〜テストが揃っている
 - 実装順が復元可能
+- UIを含む場合、コンポーネント名・パス・Propsのみのコンポーネント設計がある
+- 状態管理を含む場合、既存利用判断・state・actionsを示すStore設計がある

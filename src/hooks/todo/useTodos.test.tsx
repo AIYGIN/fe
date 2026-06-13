@@ -5,8 +5,7 @@ import { describe, expect, it } from "vitest";
 import type { TodoDto } from "@/apis/generated/model";
 import { getTodoControllerUpdateTodoMockHandler } from "@/apis/generated/todos/todos.msw";
 import { todoMockServer } from "@/apis/todos.mock-server";
-import { TodoApiStoreProvider } from "@/stores/todo/provider";
-import { useTodos } from "./useTodos";
+import { TodoApiStoreProvider, useTodos } from ".";
 
 const todoFixture: TodoDto = {
   id: "todo-selector",
