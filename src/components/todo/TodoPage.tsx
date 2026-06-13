@@ -115,6 +115,9 @@ export function TodoPage({
     () => todos.filter((todo) => todo.completed),
     [todos],
   );
+  const isBulkDeleteBlocked = completedTodos.some((todo) =>
+    pendingToggleIds.has(todo.id),
+  );
   const isDeletePending =
     deleteRequest?.todos.some((todo) => pendingDeleteIds.has(todo.id)) ?? false;
   const dialogError = deleteRequest
@@ -344,7 +347,7 @@ export function TodoPage({
             <button
               className={styles.bulkDeleteButton}
               type="button"
-              disabled={completedTodos.length === 0}
+              disabled={completedTodos.length === 0 || isBulkDeleteBlocked}
               aria-label={`完了済みを一括削除（${completedTodos.length}件）`}
               onClick={() =>
                 openDeleteDialog({ kind: "bulk", todos: completedTodos })
@@ -396,6 +399,7 @@ export function TodoPage({
               <ul className={styles.list} aria-label="TODO一覧">
                 {visibleTodos.map((todo) => {
                   const isTogglePending = pendingToggleIds.has(todo.id);
+                  const isDeletePending = pendingDeleteIds.has(todo.id);
 
                   return (
                     <li className={styles.item} key={todo.id}>
@@ -404,7 +408,7 @@ export function TodoPage({
                           className={styles.checkbox}
                           type="checkbox"
                           checked={todo.completed}
-                          disabled={isTogglePending}
+                          disabled={isTogglePending || isDeletePending}
                           aria-label={`${todo.title}を${todo.completed ? "未完了" : "完了"}にする`}
                           onChange={() => void toggleTodo(todo)}
                         />
@@ -437,7 +441,7 @@ export function TodoPage({
                       <button
                         className={styles.deleteButton}
                         type="button"
-                        disabled={pendingDeleteIds.has(todo.id)}
+                        disabled={isDeletePending || isTogglePending}
                         onClick={() =>
                           openDeleteDialog({ kind: "single", todos: [todo] })
                         }

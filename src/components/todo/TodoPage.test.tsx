@@ -427,6 +427,60 @@ describe("TodoPage", () => {
     expect(screen.getByText("完了済みTODO")).toBeInTheDocument();
   });
 
+  it("完了切り替え中は同一TODOの削除操作を開始できない", async () => {
+    const user = userEvent.setup();
+    const updateResponse = createDeferred();
+    const unrelatedCompletedTodoFixture: TodoDto = {
+      id: "todo-unrelated-completed",
+      title: "無関係な完了済みTODO",
+      completed: true,
+      createdAt: "2026-06-05T00:00:00.000Z",
+    };
+    let updateRequestCount = 0;
+    todoMockServer.resetHandlers(
+      ...createTodoMockHandlers([
+        newestTodoFixture,
+        oldCompletedTodoFixture,
+        unrelatedCompletedTodoFixture,
+      ]),
+    );
+    todoMockServer.use(
+      getTodoControllerUpdateTodoMockHandler(async () => {
+        updateRequestCount += 1;
+        await updateResponse.promise;
+        return { ...oldCompletedTodoFixture, completed: false };
+      }),
+    );
+    renderTodoPage();
+
+    const checkbox = await screen.findByRole("checkbox", {
+      name: "完了済みTODOを未完了にする",
+    });
+    const deleteButton = screen.getByRole("button", {
+      name: "削除: 完了済みTODO",
+    });
+    const unrelatedDeleteButton = screen.getByRole("button", {
+      name: "削除: 無関係な完了済みTODO",
+    });
+    const bulkDeleteButton = screen.getByRole("button", {
+      name: "完了済みを一括削除（2件）",
+    });
+
+    await user.click(checkbox);
+    await waitFor(() => {
+      expect(updateRequestCount).toBe(1);
+    });
+
+    expect.soft(deleteButton).toBeDisabled();
+    expect.soft(bulkDeleteButton).toBeDisabled();
+    expect.soft(unrelatedDeleteButton).toBeEnabled();
+
+    updateResponse.resolve();
+    await screen.findByRole("checkbox", {
+      name: "完了済みTODOを完了にする",
+    });
+  });
+
   it("削除失敗時は対象TODOと既存一覧を保持してダイアログ内にエラーを表示する", async () => {
     const user = userEvent.setup();
     todoMockServer.use(createDeleteTodoErrorHandler());

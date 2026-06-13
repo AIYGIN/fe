@@ -417,6 +417,45 @@ describe("todo-api-store", () => {
     );
   });
 
+  it("完了切り替え中は同じTODOを削除せず、別のTODOは削除できる", async () => {
+    const updateResponse = createDeferred<TodoDto>();
+    const deleteRequestIds: string[] = [];
+    todoMockServer.use(
+      getTodoControllerUpdateTodoMockHandler(() => updateResponse.promise),
+      getTodoControllerDeleteTodoMockHandler(({ params }) => {
+        deleteRequestIds.push(String(params.id));
+      }),
+    );
+    const store = createStore([activeTodoFixture, completedTodoFixture]);
+
+    const toggleRequest = store.getState().toggleTodo(activeTodoFixture);
+    await waitFor(() => {
+      expect(
+        hasPendingId(store.getState().pendingToggleIds, activeTodoFixture.id),
+      ).toBe(true);
+    });
+
+    const blockedResult = await store
+      .getState()
+      .removeTodos([activeTodoFixture]);
+    const unrelatedResult = await store
+      .getState()
+      .removeTodos([completedTodoFixture]);
+
+    expect.soft(blockedResult).toEqual({
+      succeededIds: [],
+      failedIds: [],
+    });
+    expect.soft(unrelatedResult).toEqual({
+      succeededIds: [completedTodoFixture.id],
+      failedIds: [],
+    });
+    expect.soft(deleteRequestIds).toEqual([completedTodoFixture.id]);
+
+    updateResponse.resolve({ ...activeTodoFixture, completed: true });
+    await toggleRequest;
+  });
+
   it("完了切り替え失敗時は対象を保持し、再試行開始時に対象エラーを解除する", async () => {
     todoMockServer.use(
       http.patch(todoMockUrls.update, () =>
@@ -497,6 +536,41 @@ describe("todo-api-store", () => {
     expect(getAnnouncementMessage(store.getState().announcement)).toBe(
       "2件のTODOを削除しました",
     );
+  });
+
+  it("削除中は同じTODOの完了切り替えを開始せず、別のTODOは切り替えられる", async () => {
+    const deleteResponse = createDeferred<void>();
+    const updateRequestIds: string[] = [];
+    todoMockServer.use(
+      getTodoControllerDeleteTodoMockHandler(async () => {
+        await deleteResponse.promise;
+      }),
+      getTodoControllerUpdateTodoMockHandler(({ params }) => {
+        const id = String(params.id);
+        updateRequestIds.push(id);
+        const target =
+          id === activeTodoFixture.id
+            ? activeTodoFixture
+            : completedTodoFixture;
+        return { ...target, completed: !target.completed };
+      }),
+    );
+    const store = createStore([activeTodoFixture, completedTodoFixture]);
+
+    const deleteRequest = store.getState().removeTodos([activeTodoFixture]);
+    await waitFor(() => {
+      expect(
+        hasPendingId(store.getState().pendingDeleteIds, activeTodoFixture.id),
+      ).toBe(true);
+    });
+
+    await store.getState().toggleTodo(activeTodoFixture);
+    await store.getState().toggleTodo(completedTodoFixture);
+
+    expect.soft(updateRequestIds).toEqual([completedTodoFixture.id]);
+
+    deleteResponse.resolve(undefined);
+    await deleteRequest;
   });
 
   it("一括削除が一部失敗した場合は成功分だけ削除して失敗IDを返す", async () => {

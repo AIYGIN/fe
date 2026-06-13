@@ -199,7 +199,10 @@ export const createTodoApiStore = ({
         }
       },
       toggleTodo: async (todo) => {
-        if (get().pendingToggleIds.has(todo.id)) {
+        if (
+          get().pendingToggleIds.has(todo.id) ||
+          get().pendingDeleteIds.has(todo.id)
+        ) {
           return;
         }
 
@@ -250,7 +253,11 @@ export const createTodoApiStore = ({
       removeTodos: async (targets) => {
         const targetIds = targets
           .map((todo) => todo.id)
-          .filter((id) => !get().pendingDeleteIds.has(id));
+          .filter(
+            (id) =>
+              !get().pendingDeleteIds.has(id) &&
+              !get().pendingToggleIds.has(id),
+          );
 
         if (targetIds.length === 0) {
           return { succeededIds: [], failedIds: [] };
