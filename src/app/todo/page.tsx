@@ -1,5 +1,5 @@
-import { TodoRoute } from "./TodoRoute";
+import { TodoTemplate } from "@/components/templates/Todo";
 
 export default function Page() {
-  return <TodoRoute />;
+  return <TodoTemplate enableBrowserMock />;
 }

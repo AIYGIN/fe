@@ -16,7 +16,7 @@ import {
   getTodoControllerUpdateTodoMockHandler,
 } from "@/apis/generated/todos/todos.msw";
 import { todoMockServer } from "@/apis/todos.mock-server";
-import { TodoPage } from "./TodoPage";
+import { TodoTemplate } from ".";
 
 const newestTodoFixture: TodoDto = {
   id: "todo-new",
@@ -55,7 +55,7 @@ const todoMockUrls = {
 } as const;
 
 const renderTodoPage = () => {
-  render(<TodoPage />);
+  render(<TodoTemplate />);
 };
 
 const createDeferred = () => {
@@ -124,7 +124,7 @@ const createDeleteTodoErrorHandler = () =>
     HttpResponse.json(todoErrorFixtures.delete, { status: 500 }),
   );
 
-describe("TodoPage", () => {
+describe("TodoTemplate", () => {
   beforeEach(() => {
     todoMockServer.resetHandlers(...createTodoMockHandlers());
   });

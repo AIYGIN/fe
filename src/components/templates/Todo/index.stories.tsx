@@ -16,7 +16,7 @@ import {
   getTodoControllerGetTodosMockHandler,
   getTodoControllerUpdateTodoMockHandler,
 } from "@/apis/generated/todos/todos.msw";
-import { TodoPage } from "./TodoPage";
+import { TodoTemplate } from ".";
 
 type TodoStoryParameters = {
   todoHandlerFactory?: () => RequestHandler[];
@@ -105,13 +105,13 @@ const loadTodoHandlers = async (context: Parameters<typeof mswLoader>[0]) => {
 };
 
 const meta = {
-  title: "Todo/TodoPage",
-  component: TodoPage,
+  title: "Todo/TodoTemplate",
+  component: TodoTemplate,
   loaders: [loadTodoHandlers],
   parameters: {
     layout: "fullscreen",
   },
-} satisfies Meta<typeof TodoPage>;
+} satisfies Meta<typeof TodoTemplate>;
 
 export default meta;
 
