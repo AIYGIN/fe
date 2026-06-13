@@ -20,7 +20,7 @@ type TodoMutationInput =
   | { type: "delete"; ids: string[] };
 type TodoMutation = TodoMutationInput & { revision: number };
 
-type TodoApiStoreOptions = {
+export type TodoApiStoreOptions = {
   initialTodos: TodoDto[];
   initialStatus: LoadStatus;
   initialError: string;
@@ -364,3 +364,5 @@ export const createTodoApiStore = ({
 
   return store;
 };
+
+export type TodoApiStore = ReturnType<typeof createTodoApiStore>;

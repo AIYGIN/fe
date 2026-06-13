@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import type { TodoDto } from "@/apis/generated/model";
 import { useTodos } from "@/hooks/todo/useTodos";
+import { TodoApiStoreProvider } from "@/stores/todo/provider";
 import type { TodoFilter } from "@/types/todo";
 import styles from "./TodoPage.module.css";
 
@@ -40,44 +42,209 @@ const validateTitle = (value: string) => {
   return null;
 };
 
-export function TodoPage({
-  initialTodos = [],
-  initialFilter = "all",
-  initialStatus = "loading",
-  initialError = "",
-  initialDraft = "",
-  initialValidationError = "",
-  autoLoad = true,
-}: TodoPageProps) {
-  const {
-    todos,
-    status,
-    loadError,
-    createError,
-    toggleErrors,
-    deleteErrors,
-    isCreating,
-    pendingToggleIds,
-    pendingDeleteIds,
-    announcement,
-    loadTodos,
-    addTodo,
-    toggleTodo,
-    removeTodos,
-    clearCreateError,
-    clearDeleteErrors,
-  } = useTodos({
-    initialTodos,
-    initialStatus,
-    initialError,
-    autoLoad,
-  });
-  const [filter, setFilter] = useState<TodoFilter>(initialFilter);
-  const [query, setQuery] = useState("");
+type TodoComposerProps = {
+  initialDraft: string;
+  initialValidationError: string;
+};
+
+const TodoComposer = memo(function TodoComposer({
+  initialDraft,
+  initialValidationError,
+}: TodoComposerProps) {
+  const { createError, isCreating, addTodo, clearCreateError } = useTodos(
+    useShallow((state) => ({
+      createError: state.createError,
+      isCreating: state.isCreating,
+      addTodo: state.addTodo,
+      clearCreateError: state.clearCreateError,
+    })),
+  );
   const [draft, setDraft] = useState(initialDraft);
   const [validationError, setValidationError] = useState(
     initialValidationError,
   );
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const nextError = validateTitle(draft);
+
+    if (nextError) {
+      setValidationError(nextError);
+      return;
+    }
+
+    setValidationError("");
+    const created = await addTodo({ title: draft.trim() });
+    if (created) {
+      setDraft("");
+    }
+  };
+
+  return (
+    <form className={styles.form} onSubmit={handleSubmit} noValidate>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="todo-title">
+          新しいTODO
+        </label>
+        <input
+          id="todo-title"
+          className={styles.input}
+          value={draft}
+          maxLength={120}
+          onChange={(event) => {
+            setDraft(event.target.value);
+            setValidationError("");
+            clearCreateError();
+          }}
+          aria-invalid={validationError || createError ? "true" : "false"}
+          aria-describedby={
+            validationError || createError ? "todo-title-error" : undefined
+          }
+          placeholder="次に終わらせることは？"
+        />
+        {validationError || createError ? (
+          <p
+            className={styles.errorText}
+            id="todo-title-error"
+            role={createError ? "alert" : undefined}
+          >
+            {validationError || createError}
+          </p>
+        ) : (
+          <p className={styles.hint}>1〜80文字で入力できます</p>
+        )}
+      </div>
+      <button
+        className={styles.primaryButton}
+        type="submit"
+        disabled={isCreating}
+      >
+        {isCreating ? "追加中..." : "追加"}
+      </button>
+    </form>
+  );
+});
+
+const TodoHeader = memo(function TodoHeader() {
+  const todos = useTodos((state) => state.todos);
+  const activeCount = useMemo(
+    () => todos.filter((todo) => !todo.completed).length,
+    [todos],
+  );
+
+  return (
+    <header className={styles.header}>
+      <div className={styles.heading}>
+        <h1 className={styles.intro}>TODOリスト</h1>
+      </div>
+      <output className={styles.summary} aria-label="未完了件数">
+        <span className={styles.summaryValue}>{activeCount}</span>
+        <span className={styles.summaryLabel}>未完了のタスク</span>
+      </output>
+    </header>
+  );
+});
+
+type TodoPanelProps = TodoComposerProps & {
+  initialFilter: TodoFilter;
+};
+
+type TodoRowProps = {
+  todoId: string;
+  onDelete: (todo: TodoDto) => void;
+};
+
+const TodoRow = memo(function TodoRow({ todoId, onDelete }: TodoRowProps) {
+  const { todo, toggleError, isTogglePending, isDeletePending, toggleTodo } =
+    useTodos(
+      useShallow((state) => ({
+        todo: state.todos.find((item) => item.id === todoId),
+        toggleError: state.toggleErrors[todoId],
+        isTogglePending: state.pendingToggleIds.has(todoId),
+        isDeletePending: state.pendingDeleteIds.has(todoId),
+        toggleTodo: state.toggleTodo,
+      })),
+    );
+
+  if (!todo) {
+    return null;
+  }
+
+  return (
+    <li className={styles.item}>
+      <label className={styles.checkControl}>
+        <input
+          className={styles.checkbox}
+          type="checkbox"
+          checked={todo.completed}
+          disabled={isTogglePending || isDeletePending}
+          aria-label={`${todo.title}を${todo.completed ? "未完了" : "完了"}にする`}
+          onChange={() => void toggleTodo(todo)}
+        />
+        <span className={styles.customCheck} aria-hidden="true" />
+      </label>
+      <div className={styles.todoBody}>
+        <span
+          className={`${styles.todoTitle} ${
+            todo.completed ? styles.completed : ""
+          }`}
+        >
+          {todo.title}
+        </span>
+        <span className={styles.todoMeta}>
+          {isTogglePending ? "更新中..." : todo.completed ? "完了" : "未完了"}
+        </span>
+        {toggleError ? (
+          <span className={styles.rowError} role="alert">
+            {toggleError}
+          </span>
+        ) : null}
+      </div>
+      <button
+        className={styles.deleteButton}
+        type="button"
+        disabled={isDeletePending || isTogglePending}
+        onClick={() => onDelete(todo)}
+      >
+        削除: {todo.title}
+      </button>
+    </li>
+  );
+});
+
+const TodoPanel = memo(function TodoPanel({
+  initialFilter,
+  initialDraft,
+  initialValidationError,
+}: TodoPanelProps) {
+  const {
+    todos,
+    status,
+    loadError,
+    deleteErrors,
+    pendingDeleteIds,
+    loadTodos,
+    removeTodos,
+    clearDeleteErrors,
+  } = useTodos(
+    useShallow((state) => ({
+      todos: state.todos,
+      status: state.status,
+      loadError: state.loadError,
+      deleteErrors: state.deleteErrors,
+      pendingDeleteIds: state.pendingDeleteIds,
+      loadTodos: state.loadTodos,
+      removeTodos: state.removeTodos,
+      clearDeleteErrors: state.clearDeleteErrors,
+    })),
+  );
+  const isBulkDeleteBlocked = useTodos((state) =>
+    state.todos.some(
+      (todo) => todo.completed && state.pendingToggleIds.has(todo.id),
+    ),
+  );
+  const [filter, setFilter] = useState<TodoFilter>(initialFilter);
+  const [query, setQuery] = useState("");
   const [deleteRequest, setDeleteRequest] = useState<DeleteRequest | null>(
     null,
   );
@@ -115,9 +282,6 @@ export function TodoPage({
     () => todos.filter((todo) => todo.completed),
     [todos],
   );
-  const isBulkDeleteBlocked = completedTodos.some((todo) =>
-    pendingToggleIds.has(todo.id),
-  );
   const isDeletePending =
     deleteRequest?.todos.some((todo) => pendingDeleteIds.has(todo.id)) ?? false;
   const dialogError = deleteRequest
@@ -126,26 +290,19 @@ export function TodoPage({
         .find((message) => message)
     : "";
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const nextError = validateTitle(draft);
-
-    if (nextError) {
-      setValidationError(nextError);
-      return;
-    }
-
-    setValidationError("");
-    const created = await addTodo(draft.trim());
-    if (created) {
-      setDraft("");
-    }
-  };
-
-  const openDeleteDialog = (request: DeleteRequest) => {
-    clearDeleteErrors(request.todos);
-    setDeleteRequest(request);
-  };
+  const openDeleteDialog = useCallback(
+    (request: DeleteRequest) => {
+      clearDeleteErrors(request.todos);
+      setDeleteRequest(request);
+    },
+    [clearDeleteErrors],
+  );
+  const openSingleDeleteDialog = useCallback(
+    (todo: TodoDto) => {
+      openDeleteDialog({ kind: "single", todos: [todo] });
+    },
+    [openDeleteDialog],
+  );
 
   const closeDialog = useCallback(() => {
     if (!isDeletePending) {
@@ -230,62 +387,14 @@ export function TodoPage({
   };
 
   return (
-    <main className={styles.shell}>
+    <>
       <div className={styles.container}>
-        <header className={styles.header}>
-          <div className={styles.heading}>
-            <h1 className={styles.intro}>TODOリスト</h1>
-          </div>
-          <output className={styles.summary} aria-label="未完了件数">
-            <span className={styles.summaryValue}>{counts.active}</span>
-            <span className={styles.summaryLabel}>未完了のタスク</span>
-          </output>
-        </header>
-
+        <TodoHeader />
         <section className={styles.panel} aria-label="TODO管理">
-          <form className={styles.form} onSubmit={handleSubmit} noValidate>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="todo-title">
-                新しいTODO
-              </label>
-              <input
-                id="todo-title"
-                className={styles.input}
-                value={draft}
-                maxLength={120}
-                onChange={(event) => {
-                  setDraft(event.target.value);
-                  setValidationError("");
-                  clearCreateError();
-                }}
-                aria-invalid={validationError || createError ? "true" : "false"}
-                aria-describedby={
-                  validationError || createError
-                    ? "todo-title-error"
-                    : undefined
-                }
-                placeholder="次に終わらせることは？"
-              />
-              {validationError || createError ? (
-                <p
-                  className={styles.errorText}
-                  id="todo-title-error"
-                  role={createError ? "alert" : undefined}
-                >
-                  {validationError || createError}
-                </p>
-              ) : (
-                <p className={styles.hint}>1〜80文字で入力できます</p>
-              )}
-            </div>
-            <button
-              className={styles.primaryButton}
-              type="submit"
-              disabled={isCreating}
-            >
-              {isCreating ? "追加中..." : "追加"}
-            </button>
-          </form>
+          <TodoComposer
+            initialDraft={initialDraft}
+            initialValidationError={initialValidationError}
+          />
 
           <div className={styles.workspaceBar}>
             <div className={styles.searchField}>
@@ -397,73 +506,18 @@ export function TodoPage({
 
             {status === "idle" && visibleTodos.length > 0 ? (
               <ul className={styles.list} aria-label="TODO一覧">
-                {visibleTodos.map((todo) => {
-                  const isTogglePending = pendingToggleIds.has(todo.id);
-                  const isDeletePending = pendingDeleteIds.has(todo.id);
-
-                  return (
-                    <li className={styles.item} key={todo.id}>
-                      <label className={styles.checkControl}>
-                        <input
-                          className={styles.checkbox}
-                          type="checkbox"
-                          checked={todo.completed}
-                          disabled={isTogglePending || isDeletePending}
-                          aria-label={`${todo.title}を${todo.completed ? "未完了" : "完了"}にする`}
-                          onChange={() => void toggleTodo(todo)}
-                        />
-                        <span
-                          className={styles.customCheck}
-                          aria-hidden="true"
-                        />
-                      </label>
-                      <div className={styles.todoBody}>
-                        <span
-                          className={`${styles.todoTitle} ${
-                            todo.completed ? styles.completed : ""
-                          }`}
-                        >
-                          {todo.title}
-                        </span>
-                        <span className={styles.todoMeta}>
-                          {isTogglePending
-                            ? "更新中..."
-                            : todo.completed
-                              ? "完了"
-                              : "未完了"}
-                        </span>
-                        {toggleErrors[todo.id] ? (
-                          <span className={styles.rowError} role="alert">
-                            {toggleErrors[todo.id]}
-                          </span>
-                        ) : null}
-                      </div>
-                      <button
-                        className={styles.deleteButton}
-                        type="button"
-                        disabled={isDeletePending || isTogglePending}
-                        onClick={() =>
-                          openDeleteDialog({ kind: "single", todos: [todo] })
-                        }
-                      >
-                        削除: {todo.title}
-                      </button>
-                    </li>
-                  );
-                })}
+                {visibleTodos.map((todo) => (
+                  <TodoRow
+                    key={todo.id}
+                    todoId={todo.id}
+                    onDelete={openSingleDeleteDialog}
+                  />
+                ))}
               </ul>
             ) : null}
           </div>
         </section>
       </div>
-
-      <output
-        className={styles.visuallyHidden}
-        aria-label="操作結果"
-        aria-live="polite"
-      >
-        <span key={announcement.sequence}>{announcement.message}</span>
-      </output>
 
       {deleteRequest ? (
         <div className={styles.dialogBackdrop}>
@@ -520,6 +574,48 @@ export function TodoPage({
           </div>
         </div>
       ) : null}
-    </main>
+    </>
+  );
+});
+
+const TodoAnnouncement = memo(function TodoAnnouncement() {
+  const announcement = useTodos((state) => state.announcement);
+
+  return (
+    <output
+      className={styles.visuallyHidden}
+      aria-label="操作結果"
+      aria-live="polite"
+    >
+      <span key={announcement.sequence}>{announcement.message}</span>
+    </output>
+  );
+});
+
+export function TodoPage({
+  initialTodos = [],
+  initialFilter = "all",
+  initialStatus = "loading",
+  initialError = "",
+  initialDraft = "",
+  initialValidationError = "",
+  autoLoad = true,
+}: TodoPageProps) {
+  return (
+    <TodoApiStoreProvider
+      initialTodos={initialTodos}
+      initialStatus={initialStatus}
+      initialError={initialError}
+      autoLoad={autoLoad}
+    >
+      <main className={styles.shell}>
+        <TodoPanel
+          initialFilter={initialFilter}
+          initialDraft={initialDraft}
+          initialValidationError={initialValidationError}
+        />
+        <TodoAnnouncement />
+      </main>
+    </TodoApiStoreProvider>
   );
 }
