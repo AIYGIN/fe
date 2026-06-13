@@ -33,14 +33,30 @@ Next.js App Router 用ディレクトリ。
 
 コンポーネントを管理する。
 
-- UI Components
-- Page Components
-- stories
-- tests
+- `templates/<TemplateName>/index.tsx`：page単位の画面構成
+- `modules/<ModuleName>/index.tsx`：template内で組み合わせるUI単位
+- `common/<ComponentName>/index.tsx`：複数画面で再利用するUI
+- module内の子コンポーネント：`<ComponentName>/index.tsx`
+- stories / tests
+
+#### 依存方向
+
+```txt
+app/page.tsx -> templates -> modules -> hooks -> stores -> apis
+```
+
+- `page.tsx` はtemplateの公開entrypointのみをimportする
+- templateはmoduleを組み合わせ、Provider等のfeature境界を配置する
+- moduleはstoreやAPIを直接参照せず、hook / adapterを介して状態とactionを利用する
+- component間の逆向き依存、moduleからtemplateへのimportを禁止する
+- test / storyを除き、componentsから`src/stores`と`src/apis`への直接importを禁止する
+- 各template / moduleの外部公開は`index.tsx`へ限定し、内部実装のdeep importを避ける
+- コンポーネントごとにディレクトリを作り、実装は必ず`<ComponentName>/index.tsx`へ配置する
+- CSS、型、定数などコンポーネントではない共有資産は所属するtemplate / module直下へ配置してよい
 
 ---
 
-### `src/components/common`
+### `src/components/common/<ComponentName>/index.tsx`
 
 共通利用するコンポーネントパーツを管理する。
 

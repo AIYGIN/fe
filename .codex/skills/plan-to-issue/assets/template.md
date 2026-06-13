@@ -7,6 +7,12 @@
 ## スコープ
 {{scope}}
 
+## コンポーネント設計
+{{component_design}}
+
+## Store設計
+{{store_design}}
+
 ## タスク
 - [ ] {{tasks}}
 

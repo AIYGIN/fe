@@ -1,6 +1,6 @@
 ---
 name: plan-to-issue
-description: プランモードで作成した開発計画をGitHub Issue用フォーマットへ変換して自動登録する
+description: プランモードで作成した開発計画を、コンポーネント設計とStore設計を含むGitHub Issue形式へ変換して自動登録する。開発計画からIssueを作成・起票するときに使用する。
 ---
 
 # plan-to-issue
@@ -48,6 +48,7 @@ GitHub Issue（gh issue create により自動登録）
 
 - 目的・背景・機能・制約を分解して理解する
 - 暗黙的なタスクも抽出する
+- リポジトリ内の既存コンポーネント、hooks、Storeを調査し、再利用可否を判断する
 
 ---
 
@@ -60,6 +61,9 @@ GitHub Issue（gh issue create により自動登録）
 ### 3. テンプレート適用
 
 - `assets/template.md` に従いIssue構造を生成
+- UIを含む場合はコンポーネント設計を記載する
+- API状態または共有状態を扱う場合はStore設計を記載する
+- 新規設計が不要な場合も、利用する既存コンポーネントまたは既存Storeを明記する
 
 ---
 
@@ -80,3 +84,5 @@ GitHub Issue（gh issue create により自動登録）
 - tasksは抽象化されていないか
 - 実装手順が復元可能か
 - 設計・実装・テストが含まれているか
+- コンポーネント設計が「コンポーネント名・パス・Props」だけで簡潔に記載されているか
+- Store設計が既存Storeの利用判断、state、actionsを端的に示しているか

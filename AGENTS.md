@@ -219,6 +219,9 @@ src/AGENTS.md
 - UI実装ルール：`docs/rules/ui.md`
 - テストルール：`docs/rules/testing.md`
 - フロントエンド開発の実装ルール：`docs/rules/frontend.md`
+- 状態管理ルール：`docs/rules/state-management.md`
+
+APIを利用する機能の Story、test、実装、レビューでは、`docs/rules/state-management.md` を必ず参照し、状態分類と管理スコープを確認すること。
 
 ---
 
