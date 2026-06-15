@@ -3,6 +3,7 @@ import type { RequestHandler } from "msw";
 import { delay, HttpResponse, http } from "msw";
 import { mswLoader } from "msw-storybook-addon";
 import { expect } from "storybook/test";
+import { createAuthMockHandlers } from "@/apis/auth.mock-server";
 import type { TodoDto } from "@/apis/generated/model";
 import {
   getTodoControllerCreateTodoUrl,
@@ -19,6 +20,7 @@ import {
 import { TodoTemplate } from ".";
 
 type TodoStoryParameters = {
+  authHandlerFactory?: () => RequestHandler[];
   todoHandlerFactory?: () => RequestHandler[];
 };
 
@@ -57,11 +59,16 @@ const secondCompletedTodoFixture: TodoDto = {
   createdAt: "2026-06-05T01:00:00.000Z",
 };
 
-const defaultTodosFixture = [
+const authUserFixture = {
+  displayName: "Cookie User",
+  profileImageUrl: "/next.svg",
+};
+
+const defaultTodosFixture: TodoDto[] = [
   newestTodoFixture,
   oldCompletedTodoFixture,
-] as const;
-const storyTodosFixture = [activeTodoFixture, completedTodoFixture] as const;
+];
+const storyTodosFixture: TodoDto[] = [activeTodoFixture, completedTodoFixture];
 const longListTodosFixture = Array.from(
   { length: 24 },
   (_, index): TodoDto => ({
@@ -87,18 +94,22 @@ const todoMockUrls = {
 } as const;
 
 const loadTodoHandlers = async (context: Parameters<typeof mswLoader>[0]) => {
-  const { todoHandlerFactory } =
+  const { authHandlerFactory, todoHandlerFactory } =
     context.parameters as typeof context.parameters & TodoStoryParameters;
-
-  if (!todoHandlerFactory) {
-    return {};
-  }
 
   return mswLoader({
     parameters: {
       ...context.parameters,
       msw: {
-        handlers: todoHandlerFactory(),
+        handlers: [
+          ...(authHandlerFactory?.() ??
+            createAuthMockHandlers({
+              session: "authenticated",
+              logout: "success",
+              user: authUserFixture,
+            })),
+          ...(todoHandlerFactory?.() ?? []),
+        ],
       },
     },
   });
@@ -107,6 +118,10 @@ const loadTodoHandlers = async (context: Parameters<typeof mswLoader>[0]) => {
 const meta = {
   title: "Todo/TodoTemplate",
   component: TodoTemplate,
+  args: {
+    initialAuthStatus: "authenticated",
+    initialAuthUser: authUserFixture,
+  },
   loaders: [loadTodoHandlers],
   parameters: {
     layout: "fullscreen",
@@ -130,6 +145,79 @@ export const Default: Story = {
     await expect(
       await canvas.findByText(defaultTodosFixture[1].title),
     ).toBeInTheDocument();
+  },
+};
+
+export const AuthenticatedAccount: Story = {
+  args: {
+    autoLoad: false,
+    initialStatus: "idle",
+    initialTodos: defaultTodosFixture,
+    initialAuthStatus: "authenticated",
+    initialAuthUser: authUserFixture,
+  },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText("Cookie User")).toBeInTheDocument();
+    await expect(
+      await canvas.findByRole("button", { name: "ログアウト" }),
+    ).toBeEnabled();
+  },
+};
+
+export const LogoutPending: Story = {
+  args: {
+    autoLoad: false,
+    initialStatus: "idle",
+    initialTodos: defaultTodosFixture,
+    initialAuthStatus: "authenticated",
+    initialAuthUser: authUserFixture,
+  },
+  parameters: {
+    authHandlerFactory: () =>
+      createAuthMockHandlers({
+        session: "authenticated",
+        logout: "pending",
+        user: authUserFixture,
+      }),
+  },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      await canvas.findByRole("button", { name: "ログアウト" }),
+    );
+
+    await expect(
+      await canvas.findByRole("button", { name: "ログアウト" }),
+    ).toBeDisabled();
+    await expect(
+      await canvas.findByText("ログアウトしています"),
+    ).toBeInTheDocument();
+  },
+};
+
+export const LogoutError: Story = {
+  args: {
+    autoLoad: false,
+    initialStatus: "idle",
+    initialTodos: defaultTodosFixture,
+    initialAuthStatus: "authenticated",
+    initialAuthUser: authUserFixture,
+  },
+  parameters: {
+    authHandlerFactory: () =>
+      createAuthMockHandlers({
+        session: "authenticated",
+        logout: "api-error",
+        user: authUserFixture,
+      }),
+  },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      await canvas.findByRole("button", { name: "ログアウト" }),
+    );
+
+    await expect(await canvas.findByRole("alert")).toHaveTextContent(
+      "ログアウトできませんでした",
+    );
   },
 };
 

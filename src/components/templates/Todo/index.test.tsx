@@ -1,7 +1,13 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  authMockServer,
+  authUserFixture,
+  createAuthMockHandlers,
+} from "@/apis/auth.mock-server";
+import { getAuthControllerLogoutUrl } from "@/apis/generated/auth/auth";
 import type { TodoDto } from "@/apis/generated/model";
 import {
   getTodoControllerCreateTodoUrl,
@@ -45,6 +51,7 @@ const todoErrorFixtures = {
   create: { message: "TODOを追加できませんでした" },
   update: { message: "完了状態を更新できませんでした" },
   delete: { message: "TODOを削除できませんでした" },
+  partialDelete: { message: "一部のTODOを削除できませんでした" },
 } as const;
 
 const todoMockUrls = {
@@ -54,8 +61,18 @@ const todoMockUrls = {
   delete: `*${getTodoControllerDeleteTodoUrl(":id")}`,
 } as const;
 
-const renderTodoPage = () => {
-  render(<TodoTemplate />);
+const logoutMockUrl = `*${getAuthControllerLogoutUrl()}`;
+
+const renderTodoPage = (
+  props: Partial<React.ComponentProps<typeof TodoTemplate>> = {},
+) => {
+  render(
+    <TodoTemplate
+      initialAuthStatus="authenticated"
+      initialAuthUser={authUserFixture}
+      {...props}
+    />,
+  );
 };
 
 const createDeferred = () => {
@@ -125,8 +142,111 @@ const createDeleteTodoErrorHandler = () =>
   );
 
 describe("TodoTemplate", () => {
+  const originalLocation = window.location;
+  const locationAssignMock = vi.fn();
+
   beforeEach(() => {
-    todoMockServer.resetHandlers(...createTodoMockHandlers());
+    todoMockServer.resetHandlers(
+      ...createTodoMockHandlers(),
+      ...createAuthMockHandlers({
+        session: "authenticated",
+        logout: "success",
+        user: authUserFixture,
+      }),
+    );
+    locationAssignMock.mockReset();
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: {
+        ...originalLocation,
+        assign: locationAssignMock,
+      },
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: originalLocation,
+    });
+  });
+
+  it("認証済みユーザー情報を表示し、ログアウト成功後にloginへ遷移する", async () => {
+    const user = userEvent.setup();
+
+    renderTodoPage();
+
+    expect(await screen.findByText("Cookie User")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "ログアウト" }));
+
+    await waitFor(() => {
+      expect(locationAssignMock).toHaveBeenCalledWith("/login");
+    });
+    expect(
+      screen.queryByRole("region", { name: "アカウント" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("ログアウト中は多重実行できない", async () => {
+    const user = userEvent.setup();
+    const logoutResponse = createDeferred();
+    let requestCount = 0;
+
+    authMockServer.use(
+      http.post(logoutMockUrl, () => {
+        requestCount += 1;
+        return logoutResponse.promise.then(
+          () => new HttpResponse(null, { status: 204 }),
+        );
+      }),
+    );
+
+    renderTodoPage();
+
+    const logoutButton = await screen.findByRole("button", {
+      name: "ログアウト",
+    });
+
+    await user.click(logoutButton);
+
+    expect(logoutButton).toBeDisabled();
+    expect(screen.getByText("ログアウトしています")).toBeInTheDocument();
+
+    await user.click(logoutButton);
+
+    expect(requestCount).toBe(1);
+    logoutResponse.resolve();
+  });
+
+  it("ログアウト失敗時はエラーを表示し、loginへ遷移しない", async () => {
+    const user = userEvent.setup();
+
+    authMockServer.use(
+      http.post(logoutMockUrl, () =>
+        HttpResponse.json({ message: "failed" }, { status: 500 }),
+      ),
+    );
+
+    renderTodoPage();
+
+    await user.click(await screen.findByRole("button", { name: "ログアウト" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "ログアウトできませんでした",
+    );
+    expect(locationAssignMock).not.toHaveBeenCalled();
+  });
+
+  it("未認証状態で表示された場合はloginへ遷移する", async () => {
+    renderTodoPage({
+      initialAuthStatus: "unauthenticated",
+      initialAuthUser: null,
+    });
+
+    await waitFor(() => {
+      expect(locationAssignMock).toHaveBeenCalledWith("/login");
+    });
   });
 
   it("TODO一覧を新しい順に表示する", async () => {
