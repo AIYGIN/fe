@@ -18,6 +18,10 @@
 - Orval生成APIクライアント・mock前提開発
 - マルチエージェント分業開発
 
+APIクライアントは `src/apis/generated` のOrval生成物を本番コードから直接利用する。
+`src/apis` 直下へ本番用APIラッパーや業務ロジックを追加してはならない。
+直下に配置できるのはOrval共通mutatorとmock / test用の構成ファイルに限定する。
+
 ---
 
 ## マルチエージェント構成

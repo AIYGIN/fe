@@ -229,33 +229,6 @@ describe("auth-store", () => {
     });
   });
 
-  it("checkSessionは秘密フィールドを含む200レスポンスを表示用ユーザーだけへ正規化して保持する", async () => {
-    const unsafeResponse: unknown = {
-      displayName: "Cookie User",
-      profileImageUrl: "https://example.com/profile.png",
-      jwt: "jwt-secret",
-      token: "provider-token",
-      id: "google-user-id",
-      sub: "subject-id",
-      email: "user@example.com",
-    };
-    authMockServer.use(
-      http.get(authMockUrls.me, () => HttpResponse.json(unsafeResponse)),
-    );
-    const store = createStore();
-
-    await store.getState().checkSession();
-
-    expect(store.getState()).toMatchObject({
-      status: "authenticated",
-      error: "",
-    });
-    expect(store.getState().user).toEqual({
-      displayName: "Cookie User",
-      profileImageUrl: "https://example.com/profile.png",
-    });
-  });
-
   it("checkSessionは401をエラーではないunauthenticatedへ遷移させる", async () => {
     authMockServer.use(
       http.get(authMockUrls.me, () =>

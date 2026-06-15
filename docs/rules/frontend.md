@@ -115,7 +115,7 @@ Reactロジックの再利用を管理する。
 
 - UIコンポーネントの定義
 - pure function（→ libへ）
-- APIクライアント（→ apisへ）
+- APIクライアント（→ `apis/generated` を直接利用）
 
 ---
 
@@ -146,14 +146,28 @@ Reactロジックの再利用を管理する。
 
 ### `src/apis`
 
-API関連処理を管理する。
+Orval生成物、共通mutator、mock / test用のAPI構成を管理する。
 
 #### 構成例
 
 - generated/（Orval生成物）
-- users.ts（画面向けAPIラッパー）
-- auth.ts（画面向けAPIラッパー）
+- request.ts（Orval共通mutator）
+- todos.mock-handlers.ts（Storybook / test共通handler）
 - todos.mock-browser.ts / todos.mock-server.ts（環境別MSW setup）
+
+#### 本番コードの利用ルール
+
+- store / Server Componentは `src/apis/generated` のAPIクライアントと型を直接利用する
+- `src/apis` 直下に本番用のドメイン別APIラッパーを作成しない
+- HTTP statusの判定、状態遷移、ユーザー向けエラー処理は状態の所有側で行う
+- 表示用変換はselector / render時に行い、再利用する純粋変換はfeature配下または `src/lib` に置く
+- `request.ts` はcredentials、timeout、host解決など全API共通の通信設定だけを扱う
+
+#### 禁止事項
+
+- `src/apis/<domain>.ts` への本番ロジック追加
+- APIレスポンスの画面向け正規化や状態遷移を `src/apis` に置くこと
+- `request.ts` へのドメイン固有分岐、画面固有エラー文言、状態管理の追加
 
 ---
 
@@ -191,6 +205,7 @@ pnpm api:generate
 
 - Orval生成mockは `src/apis/generated` 配下の生成物を利用し、手動編集しない
 - 追加handlerは `src/apis/generated` の Orval 生成mock handler を直接利用する
+- `src/apis` 直下のドメイン別ファイルはmock handler / fixture / setupに限定する
 - browser / test用setupは `src/apis/*.mock-browser.ts` / `src/apis/*.mock-server.ts` に配置する
 
 ---

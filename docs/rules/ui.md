@@ -112,6 +112,7 @@ API利用時は MSW を利用すること。
 
 - Orval生成handlerは `src/apis/generated` 配下の生成物を利用し、手動編集しない
 - 追加handlerは `src/apis/generated` の Orval 生成mock handler を直接利用する
+- `src/apis` 直下のドメイン別ファイルはmock handler / fixture / setupに限定する
 - Storybook用handlerは生成mockから構成する
 - Storybook 用 mock と test 用 mock を共有可能にする
 - Loading / Error / Success を切り替え可能にする

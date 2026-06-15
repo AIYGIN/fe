@@ -71,7 +71,7 @@ src/app/**/page.tsx
     -> src/components/modules
       -> src/hooks
         -> src/stores
-          -> src/apis
+          -> src/apis/generated
 ```
 
 - `page.tsx` は `templates` の公開 `index.tsx` のみをUI入口として利用する
@@ -103,8 +103,10 @@ src/app/**/page.tsx
 ### 基盤
 
 - `src/lib`：純粋関数・基盤処理
-- `src/apis`：API関連（Orval生成物・APIラッパー・handler）
+- `src/apis`：Orval生成物、共通mutator、mock / test用handler・setup
 - `src/apis/generated`：Orval生成物（手動編集禁止）
+- 本番機能コードは `src/apis/generated` のAPIクライアントと型を直接利用する
+- `src/apis` 直下への本番用APIラッパー、レスポンス変換、状態遷移、エラー文言変換の追加は禁止する
 
 ---
 
@@ -195,34 +197,28 @@ pnpm api:generate
 
 ### APIクライアントルール（重要）
 
-Orval の `fetch` client を優先する。
-
-画面向けの変換やエラーハンドリングが必要な場合のみ、`src/apis/*.ts` に薄いラッパーを実装する。
-
----
-
-#### 役割
-
-- エラーハンドリング統一
-- JSON変換補助
-- 認証ヘッダー付与
-- ログ処理（必要時）
+本番コードはOrvalの `fetch` clientと生成型を直接利用する。
 
 ---
 
 #### 原則
 
-- Server Componentでは直接 fetch を使用する
-- 無理にラップしない
-- Next.js の fetch のキャッシュ機能を損なわない
+- APIを利用するstore / Server Componentは `src/apis/generated` から直接importする
+- HTTP statusの判定、状態遷移、ユーザー向けエラーは、その状態を所有するstore / Server Componentで扱う
+- 表示用のderived valueはselectorまたはrender時に計算する
+- 再利用可能な純粋変換が必要な場合は、API層ではなくfeature配下または `src/lib` に置く
+- 共通の通信設定はOrval mutatorの `src/apis/request.ts` に限定する
+- `src/apis/request.ts` へ業務固有の分岐や画面固有のエラー処理を追加しない
 
 ---
 
 ### API呼び出しルール
 
 - UI側から直接fetch禁止
-- ドメインごとに `src/apis/*.ts` へラッパーを分割する
+- 本番機能コードは `src/apis/generated` のAPIクライアントを直接利用する
+- `src/apis` 直下にドメイン別APIラッパーを作成しない
 - `src/apis/generated` 配下の生成物は手動編集しない
+- URL、HTTPメソッド、APIレスポンス型を手書きで複製しない
 
 ---
 
@@ -230,6 +226,7 @@ Orval の `fetch` client を優先する。
 
 - Orval生成mockを優先する
 - 追加handlerは `src/apis/generated` の Orval 生成mock handler を直接利用する
+- `src/apis` 直下のドメイン別ファイルはmock handler / fixture / setupに限定する
 - browser / test用setupは `src/apis/*.mock-browser.ts` / `src/apis/*.mock-server.ts` に配置する
 - Storybook / test 両方で共有する
 - 実API通信は禁止

@@ -20,6 +20,8 @@ tests は振る舞い契約、
 
 - APIを利用する機能は、着手時に状態を Server/API、共有client、Page/local UI、URL、DOM refへ分類する。
 - APIクライアント、型、mockは Orval 生成物を利用し、`src/apis/generated` 配下を手動編集しない。
+- 本番機能コードは `src/apis/generated` を直接利用し、`src/apis` 直下に本番用APIラッパーや業務ロジックを追加しない。
+- `src/apis` 直下はOrval共通mutatorとmock / test用handler・setupに限定する。
 - API状態とUI状態を分離し、必要な最小スコープへ配置する。
 - Zustand等のstoreを利用する場合は、feature / page専用の独立store instanceとし、SSR request、Story、test間で共有しない。
 - feature / page専用storeを作成する場合は `src/stores/<feature>` に配置し、UI component配下へAPI storeを置かない。
@@ -47,7 +49,7 @@ tests は振る舞い契約、
   - feature / page専用storeを作成する場合は `src/stores/<feature>` に配置し、UI component配下へAPI storeを置かない。
   - 実装完了後、Storybook で確認可能な状態にすること。
 - 実装完了後、Storybook 上で確認およびレビューを行うこと。
-- API利用時のレビューでは、状態分類、Orval生成物の利用、API/UI状態の分離、非同期競合防止を確認すること。
+- API利用時のレビューでは、状態分類、Orval生成物の直接利用、`src/apis` 直下への本番ロジック混入がないこと、API/UI状態の分離、非同期競合防止を確認すること。
 - 各レビューで問題があった場合は、修正して再レビューを行うこと。
 
 ---
@@ -261,6 +263,7 @@ tests は振る舞い契約、
 - 必要なUI状態が定義済み
 - API利用時は状態分類と管理スコープを確認済み
 - API利用時はOrval生成型/API/mockを利用済み
+- API利用時は本番コードから生成APIを直接利用し、`src/apis` 直下に本番用ラッパーを追加していない
 - review 完了
 - 実装完了
 - Storybook で確認済み

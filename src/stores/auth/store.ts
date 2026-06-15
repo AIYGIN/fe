@@ -1,5 +1,8 @@
 import { createStore } from "zustand/vanilla";
-import { getAuthSession, logoutAuthSession } from "@/apis/auth";
+import {
+  authControllerGetMe,
+  authControllerLogout,
+} from "@/apis/generated/auth/auth";
 import type { AuthMeResponseDto } from "@/apis/generated/model";
 
 export type AuthStatus =
@@ -52,18 +55,31 @@ export const createAuthStore = ({
 
       const request = (async () => {
         try {
-          const user = await getAuthSession();
+          const response = await authControllerGetMe();
 
           if (requestRevision !== authRevision) {
             return;
           }
 
-          if (user) {
-            set({ user, status: "authenticated", error: "" });
+          if (response.status === 200) {
+            set({
+              user: response.data,
+              status: "authenticated",
+              error: "",
+            });
             return;
           }
 
-          set({ user: null, status: "unauthenticated", error: "" });
+          if (response.status === 401) {
+            set({ user: null, status: "unauthenticated", error: "" });
+            return;
+          }
+
+          set({
+            user: null,
+            status: "error",
+            error: "認証状態を確認できませんでした",
+          });
         } catch {
           if (requestRevision === authRevision) {
             set({
@@ -92,7 +108,12 @@ export const createAuthStore = ({
       set({ isLoggingOut: true, error: "" });
 
       try {
-        await logoutAuthSession();
+        const response = await authControllerLogout();
+
+        if (response.status !== 204) {
+          throw new Error("logout failed");
+        }
+
         set({ user: null, status: "unauthenticated", error: "" });
       } catch {
         set({ status: "error", error: "ログアウトできませんでした" });

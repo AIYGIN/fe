@@ -108,7 +108,9 @@ API利用時は MSW を利用すること。
 
 - Orval生成handlerは `src/apis/generated` 配下の生成物を利用し、手動編集しない
 - 追加handlerは `src/apis/generated` の Orval 生成mock handler を直接利用する
+- `src/apis` 直下のドメイン別ファイルはmock handler / fixture / setupに限定する
 - test用server setupは `src/apis/*.mock-server.ts` に配置する
+- 本番用APIラッパーをテスト対象として新設せず、生成APIを利用するstore / Server Componentの振る舞いを検証する
 - 実API通信を行ってはいけない
 
 ---
