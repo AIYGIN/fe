@@ -1,13 +1,19 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { TodoDto } from "./generated/model";
+import type { AuthMeResponseDto, TodoDto } from "./generated/model";
 
 const importGeneratedTodoApi = () => import("./generated/todos/todos");
+const importGeneratedAuthApi = () => import("./generated/auth/auth");
 
 const todo: TodoDto = {
   id: "todo-1",
   title: "既存TODO",
   completed: false,
   createdAt: "2026-06-05T01:00:00.000Z",
+};
+
+const authUser: AuthMeResponseDto = {
+  displayName: "Cookie User",
+  profileImageUrl: "https://example.com/profile.png",
 };
 
 const jsonResponse = (body: unknown, status: number) =>
@@ -79,6 +85,38 @@ const operationCases = [
       method: "DELETE",
       cache: "no-store",
       traceId: "delete-todo",
+      contentType: undefined,
+      body: undefined,
+    },
+  },
+  {
+    name: "AUTH GET",
+    path: "/auth/me",
+    response: () => jsonResponse(authUser, 200),
+    invoke: async (options: RequestInit) => {
+      const { authControllerGetMe } = await importGeneratedAuthApi();
+      return authControllerGetMe(options);
+    },
+    expectedInit: {
+      method: "GET",
+      cache: "no-store",
+      traceId: "get-auth-me",
+      contentType: undefined,
+      body: undefined,
+    },
+  },
+  {
+    name: "AUTH POST",
+    path: "/auth/logout",
+    response: () => new Response(null, { status: 204 }),
+    invoke: async (options: RequestInit) => {
+      const { authControllerLogout } = await importGeneratedAuthApi();
+      return authControllerLogout(options);
+    },
+    expectedInit: {
+      method: "POST",
+      cache: "no-store",
+      traceId: "logout-auth",
       contentType: undefined,
       body: undefined,
     },

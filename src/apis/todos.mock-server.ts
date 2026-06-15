@@ -1,4 +1,3 @@
-import { setupServer } from "msw/node";
-import { getTodosMock } from "./generated/todos/todos.msw";
+import { apiMockServer } from "./api.mock-server";
 
-export const todoMockServer = setupServer(...getTodosMock());
+export const todoMockServer = apiMockServer;
