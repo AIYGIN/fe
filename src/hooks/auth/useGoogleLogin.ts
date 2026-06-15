@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { getAuthControllerGoogleLoginUrl } from "@/apis/generated/auth/auth";
 import { getApiHost } from "@/apis/request";
-import { sanitizeLoginReturnTo } from "@/lib/auth/returnTo";
+import { sanitizeLoginReturnTo } from "@/lib/pages/login";
 
 export function useGoogleLogin(returnTo?: string) {
   return useCallback(() => {

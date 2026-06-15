@@ -75,6 +75,8 @@ src/app/**/page.tsx
 ```
 
 - `page.tsx` は `templates` の公開 `index.tsx` のみをUI入口として利用する
+- `page.tsx` で受け取る `params` / `searchParams` は zod で検証し、検証ロジックは `src/lib/pages/<route>/index.ts` に配置する
+- URLパラメータ検証は `page.tsx` 内に直接書かず、検証済みの値だけを template に渡す
 - `templates` は `modules` と `hooks` を組み合わせ、store instanceのProvider境界を所有する
 - `modules` はUIと局所状態を担当し、store / APIを直接importせず `hooks` の公開adapterを利用する
 - `components` から `src/stores` / `src/apis` への直接importは禁止する

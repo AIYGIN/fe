@@ -1,5 +1,5 @@
 import { LoginTemplate } from "@/components/templates/Login";
-import { sanitizeLoginReturnTo } from "@/lib/auth/returnTo";
+import { parseLoginSearchParams } from "@/lib/pages/login";
 
 type LoginPageProps = {
   searchParams?: Promise<{
@@ -9,7 +9,7 @@ type LoginPageProps = {
 
 export default async function Page({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-  const next = Array.isArray(params?.next) ? params.next[0] : params?.next;
+  const { returnTo } = parseLoginSearchParams(params);
 
-  return <LoginTemplate returnTo={sanitizeLoginReturnTo(next)} />;
+  return <LoginTemplate returnTo={returnTo} />;
 }
