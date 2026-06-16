@@ -284,3 +284,78 @@ pnpm test:e2e
 - pnpm test:e2e がある場合はすべてパスすること
 - Storybookで破綻がないこと
 - レビューで承認されていること
+
+## Memory rule
+
+各タスクの最後に、必要に応じて今回の作業内容を要約し、agent-memory を更新する。
+
+- 長期的に残すべき設計判断・運用方針・プロジェクト固有の決定事項は long_term に保存する。
+- 今日の実装メモ・調査内容・作業ログは daily に保存する。
+- 次回以降に対応する未完了タスクや TODO は scratchpad に保存する。
+- 秘密情報、API トークン、パスワード、認証情報、個人情報は保存しない。
+- 明らかに一時的な情報や、後から役に立たない雑多なログは保存しない。
+
+使用コマンド:
+
+- `agent-memory write --target daily --content "..."`
+- `agent-memory write --target long_term --content "..."`
+- `agent-memory scratchpad add --text "..."`
+
+## Session start rule
+
+セッション開始時、ユーザーから「前回の続き」「再開」「続きから」「思い出して」などの指示があった場合は、作業前に必ず agent-memory を確認する。
+
+確認対象:
+
+1. scratchpad の未完了 TODO
+2. daily の直近日付ログ
+3. long_term の関連する設計判断
+
+確認後、以下の形式でユーザーに短く報告する。
+
+- 前回やっていたこと:
+- 未完了 TODO:
+- 今回最初にやること:
+
+<!-- headroom:rtk-instructions -->
+# RTK (Rust Token Killer) - Token-Optimized Commands
+
+When running shell commands, **always prefix with `rtk`**. This reduces context
+usage by 60-90% with zero behavior change. If rtk has no filter for a command,
+it passes through unchanged — so it is always safe to use.
+
+## Key Commands
+```bash
+# Git (59-80% savings)
+rtk git status          rtk git diff            rtk git log
+
+# Files & Search (60-75% savings)
+rtk ls <path>           rtk read <file>         rtk grep <pattern>
+rtk find <pattern>      rtk diff <file>
+
+# Test (90-99% savings) — shows failures only
+rtk pytest tests/       rtk cargo test          rtk test <cmd>
+
+# Build & Lint (80-90% savings) — shows errors only
+rtk tsc                 rtk lint                rtk cargo build
+rtk prettier --check    rtk mypy                rtk ruff check
+
+# Analysis (70-90% savings)
+rtk err <cmd>           rtk log <file>          rtk json <file>
+rtk summary <cmd>       rtk deps                rtk env
+
+# GitHub (26-87% savings)
+rtk gh pr view <n>      rtk gh run list         rtk gh issue list
+
+# Infrastructure (85% savings)
+rtk docker ps           rtk kubectl get         rtk docker logs <c>
+
+# Package managers (70-90% savings)
+rtk pip list            rtk pnpm install        rtk npm run <script>
+```
+
+## Rules
+- In command chains, prefix each segment: `rtk git add . && rtk git commit -m "msg"`
+- For debugging, use raw command without rtk prefix
+- `rtk proxy <cmd>` runs command without filtering but tracks usage
+<!-- /headroom:rtk-instructions -->
