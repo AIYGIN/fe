@@ -7,7 +7,10 @@ import {
   authUserFixture,
   createAuthMockHandlers,
 } from "@/apis/auth.mock-server";
-import { getAuthControllerLogoutUrl } from "@/apis/generated/auth/auth";
+import {
+  getAuthControllerGetMeUrl,
+  getAuthControllerLogoutUrl,
+} from "@/apis/generated/auth/auth";
 import type { TodoDto } from "@/apis/generated/model";
 import {
   getTodoControllerCreateTodoUrl,
@@ -171,6 +174,74 @@ describe("TodoTemplate", () => {
     });
   });
 
+  it("未認証時は戻り先付きでloginへ遷移し、TODOを表示しない", async () => {
+    renderTodoPage({
+      initialAuthStatus: "unauthenticated",
+      initialAuthUser: null,
+      autoCheckAuth: false,
+    });
+
+    await waitFor(() => {
+      expect(locationAssignMock).toHaveBeenCalledWith("/login?next=%2Ftodo");
+    });
+    expect(
+      screen.queryByRole("list", { name: "TODO一覧" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("認証確認中はTODOを表示せず確認中表示を出す", () => {
+    renderTodoPage({
+      initialAuthStatus: "checking",
+      initialAuthUser: null,
+      autoCheckAuth: false,
+    });
+
+    expect(
+      screen.getByText("ログイン状態を確認しています"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("list", { name: "TODO一覧" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("認証APIエラー時はTODOを表示せず再試行できる", async () => {
+    const user = userEvent.setup();
+    let getMeRequestCount = 0;
+
+    authMockServer.use(
+      http.get(`*${getAuthControllerGetMeUrl()}`, () => {
+        getMeRequestCount += 1;
+
+        if (getMeRequestCount === 1) {
+          return HttpResponse.json(
+            { message: "認証状態を確認できませんでした" },
+            { status: 500 },
+          );
+        }
+
+        return HttpResponse.json(authUserFixture, { status: 200 });
+      }),
+    );
+
+    renderTodoPage({
+      initialAuthUser: null,
+      initialAuthStatus: "idle",
+    });
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "認証状態を確認できませんでした",
+    );
+    expect(
+      screen.queryByRole("list", { name: "TODO一覧" }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "再試行" }));
+
+    expect(
+      await screen.findByRole("list", { name: "TODO一覧" }),
+    ).toBeInTheDocument();
+  });
+
   it("認証済みユーザー情報を表示し、ログアウト成功後にloginへ遷移する", async () => {
     const user = userEvent.setup();
 
@@ -181,7 +252,7 @@ describe("TodoTemplate", () => {
     await user.click(screen.getByRole("button", { name: "ログアウト" }));
 
     await waitFor(() => {
-      expect(locationAssignMock).toHaveBeenCalledWith("/login");
+      expect(locationAssignMock).toHaveBeenCalledWith("/login?next=%2Ftodo");
     });
     expect(
       screen.queryByRole("region", { name: "アカウント" }),
@@ -245,7 +316,7 @@ describe("TodoTemplate", () => {
     });
 
     await waitFor(() => {
-      expect(locationAssignMock).toHaveBeenCalledWith("/login");
+      expect(locationAssignMock).toHaveBeenCalledWith("/login?next=%2Ftodo");
     });
   });
 

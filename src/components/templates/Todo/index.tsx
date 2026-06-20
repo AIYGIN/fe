@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { AccountPanel } from "@/components/modules/AccountPanel";
+import { AuthBoundary } from "@/components/modules/AuthBoundary";
 import { TodoBoard } from "@/components/modules/TodoBoard";
 import {
   type AuthStoreOptions,
@@ -27,6 +28,7 @@ export type TodoTemplateProps = {
   initialAuthUser?: AuthStoreOptions["initialUser"];
   initialAuthStatus?: AuthStoreOptions["initialStatus"];
   initialAuthError?: AuthStoreOptions["initialError"];
+  autoCheckAuth?: boolean;
 };
 
 export function TodoTemplate({
@@ -41,6 +43,7 @@ export function TodoTemplate({
   initialAuthUser = null,
   initialAuthStatus = "idle",
   initialAuthError = "",
+  autoCheckAuth = true,
 }: TodoTemplateProps) {
   const isRuntimeReady = useTodoRuntimeReady(enableBrowserMock);
 
@@ -53,37 +56,33 @@ export function TodoTemplate({
       initialUser={initialAuthUser}
       initialStatus={initialAuthStatus}
       initialError={initialAuthError}
-      autoCheck={initialAuthStatus === "idle"}
+      autoCheck={autoCheckAuth && initialAuthStatus === "idle"}
     >
-      <TodoApiStoreProvider
-        initialTodos={initialTodos}
-        initialStatus={initialStatus}
-        initialError={initialError}
-        autoLoad={autoLoad}
-      >
-        <TodoBoard
-          initialFilter={initialFilter}
-          initialDraft={initialDraft}
-          initialValidationError={initialValidationError}
-          accountPanel={<TodoAccountPanel />}
-        />
-      </TodoApiStoreProvider>
+      <AuthBoundary loginPath="/login" returnTo="/todo">
+        <TodoApiStoreProvider
+          initialTodos={initialTodos}
+          initialStatus={initialStatus}
+          initialError={initialError}
+          autoLoad={autoLoad}
+        >
+          <TodoBoard
+            initialFilter={initialFilter}
+            initialDraft={initialDraft}
+            initialValidationError={initialValidationError}
+            accountPanel={<TodoAccountPanel />}
+          />
+        </TodoApiStoreProvider>
+      </AuthBoundary>
     </AuthStoreProvider>
   );
 }
 
 function TodoAccountPanel() {
   const user = useAuth((state) => state.user);
-  const status = useAuth((state) => state.status);
   const error = useAuth((state) => state.error);
   const isLoggingOut = useAuth((state) => state.isLoggingOut);
   const logout = useAuth((state) => state.logout);
   const clearError = useAuth((state) => state.clearError);
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      window.location.assign("/login");
-    }
-  }, [status]);
 
   const handleLogout = useCallback(() => {
     clearError();

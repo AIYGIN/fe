@@ -3,7 +3,7 @@ import type { RequestHandler } from "msw";
 import { delay, HttpResponse, http } from "msw";
 import { mswLoader } from "msw-storybook-addon";
 import { expect } from "storybook/test";
-import { createAuthMockHandlers } from "@/apis/auth.mock-server";
+import { createAuthMockHandlers } from "@/apis/auth.mock-handlers";
 import type { TodoDto } from "@/apis/generated/model";
 import {
   getTodoControllerCreateTodoUrl,
@@ -145,6 +145,36 @@ export const Default: Story = {
     await expect(
       await canvas.findByText(defaultTodosFixture[1].title),
     ).toBeInTheDocument();
+  },
+};
+
+export const AuthChecking: Story = {
+  args: {
+    autoCheckAuth: false,
+    initialAuthStatus: "checking",
+    initialAuthUser: null,
+  },
+  play: async ({ canvas }) => {
+    await expect(
+      await canvas.findByText("ログイン状態を確認しています"),
+    ).toBeInTheDocument();
+  },
+};
+
+export const AuthError: Story = {
+  args: {
+    autoCheckAuth: false,
+    initialAuthStatus: "error",
+    initialAuthUser: null,
+    initialAuthError: "認証状態を確認できませんでした",
+  },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByRole("alert")).toHaveTextContent(
+      "認証状態を確認できませんでした",
+    );
+    await expect(
+      await canvas.findByRole("button", { name: "再試行" }),
+    ).toBeEnabled();
   },
 };
 
