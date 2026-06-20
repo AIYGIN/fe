@@ -25,7 +25,7 @@ export type AuthMockScenario = {
 
 export const authUserFixture: AuthMeResponseDto = {
   displayName: "Cookie User",
-  profileImageUrl: "https://example.com/profile.png",
+  profileImageUrl: "/next.svg",
 };
 
 const authMockUrls = {

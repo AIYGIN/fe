@@ -1,3 +1,4 @@
+import { devtools } from "zustand/middleware";
 import { createStore } from "zustand/vanilla";
 import {
   authControllerGetMe,
@@ -36,93 +37,99 @@ export const createAuthStore = ({
   let authRevision = 0;
   let sessionRequest: Promise<void> | null = null;
 
-  return createStore<AuthStoreState>()((set, get) => ({
-    user: initialUser,
-    status: initialStatus,
-    error: initialError,
-    isLoggingOut: false,
-    checkSession: () => {
-      if (get().isLoggingOut) {
-        return Promise.resolve();
-      }
+  return createStore<AuthStoreState>()(
+    devtools(
+      (set, get) => ({
+        user: initialUser,
+        status: initialStatus,
+        error: initialError,
+        isLoggingOut: false,
+        checkSession: () => {
+          if (get().isLoggingOut) {
+            return Promise.resolve();
+          }
 
-      if (sessionRequest) {
-        return sessionRequest;
-      }
+          if (sessionRequest) {
+            return sessionRequest;
+          }
 
-      const requestRevision = ++authRevision;
-      set({ status: "checking", error: "" });
+          const requestRevision = ++authRevision;
+          set({ status: "checking", error: "" });
 
-      const request = (async () => {
-        try {
-          const response = await authControllerGetMe();
+          let request: Promise<void> | null = null;
+          request = (async () => {
+            try {
+              const response = await authControllerGetMe();
 
-          if (requestRevision !== authRevision) {
+              if (requestRevision !== authRevision) {
+                return;
+              }
+
+              if (response.status === 200) {
+                set({
+                  user: response.data,
+                  status: "authenticated",
+                  error: "",
+                });
+                return;
+              }
+
+              if (response.status === 401) {
+                set({ user: null, status: "unauthenticated", error: "" });
+                return;
+              }
+
+              set({
+                user: null,
+                status: "error",
+                error: "認証状態を確認できませんでした",
+              });
+            } catch {
+              if (requestRevision === authRevision) {
+                set({
+                  user: null,
+                  status: "error",
+                  error: "認証状態を確認できませんでした",
+                });
+              }
+            } finally {
+              if (sessionRequest === request) {
+                sessionRequest = null;
+              }
+            }
+          })();
+
+          sessionRequest = request;
+          return request;
+        },
+        logout: async () => {
+          if (get().isLoggingOut) {
             return;
           }
 
-          if (response.status === 200) {
-            set({
-              user: response.data,
-              status: "authenticated",
-              error: "",
-            });
-            return;
-          }
+          authRevision += 1;
+          sessionRequest = null;
+          set({ isLoggingOut: true, error: "" });
 
-          if (response.status === 401) {
+          try {
+            const response = await authControllerLogout();
+
+            if (response.status !== 204) {
+              throw new Error("logout failed");
+            }
+
             set({ user: null, status: "unauthenticated", error: "" });
-            return;
+          } catch {
+            set({ status: "error", error: "ログアウトできませんでした" });
+          } finally {
+            set({ isLoggingOut: false });
           }
-
-          set({
-            user: null,
-            status: "error",
-            error: "認証状態を確認できませんでした",
-          });
-        } catch {
-          if (requestRevision === authRevision) {
-            set({
-              user: null,
-              status: "error",
-              error: "認証状態を確認できませんでした",
-            });
-          }
-        } finally {
-          if (sessionRequest === request) {
-            sessionRequest = null;
-          }
-        }
-      })();
-
-      sessionRequest = request;
-      return request;
-    },
-    logout: async () => {
-      if (get().isLoggingOut) {
-        return;
-      }
-
-      authRevision += 1;
-      sessionRequest = null;
-      set({ isLoggingOut: true, error: "" });
-
-      try {
-        const response = await authControllerLogout();
-
-        if (response.status !== 204) {
-          throw new Error("logout failed");
-        }
-
-        set({ user: null, status: "unauthenticated", error: "" });
-      } catch {
-        set({ status: "error", error: "ログアウトできませんでした" });
-      } finally {
-        set({ isLoggingOut: false });
-      }
-    },
-    clearError: () => set({ error: "" }),
-  }));
+        },
+        clearError: () => set({ error: "" }),
+      }),
+      { name: "auth-store" },
+    ),
+  );
 };
 
 export type AuthStore = ReturnType<typeof createAuthStore>;

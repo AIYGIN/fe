@@ -9,8 +9,9 @@
   --accent-dark: #0f5143;
   --accent-soft: #e7f3ee;
   --danger: #b42318;
-  min-height: 100vh;
-  background:
+  min-height: 100dvh;
+  background-color: var(--canvas);
+  background-image:
     radial-gradient(circle at 10% 0%, rgb(210 230 219 / 55%), transparent 30rem),
     linear-gradient(180deg, #f8faf7 0%, var(--canvas) 100%);
   color: var(--ink);

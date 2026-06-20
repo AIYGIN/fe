@@ -27,6 +27,14 @@ Next.js App Router 用ディレクトリ。
 - page.tsx
 - layout.tsx
 
+#### URLパラメータ検証
+
+- `page.tsx` で受け取る `params` / `searchParams` は zod schema で検証する
+- routeごとの検証ロジックは `src/lib/pages/<route>/index.ts` に配置する
+- `page.tsx` は検証関数を呼び出し、検証・正規化済みの値だけを template に渡す
+- 外部URL、想定外形式、配列値などの境界値は schema 側で許可・破棄を明示する
+- URLパラメータ検証を template / module / hook に重複実装しない
+
 ---
 
 ### `src/components`
