@@ -1,0 +1,265 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`investment components > 主要コンポーネントを再利用可能な公開entrypointから描画できる 1`] = `
+<div>
+  <button
+    class="min-h_9 px_6 bdr_md fs_sm fw_700 trs_background-color_160ms_ease,_border-color_160ms_ease,_color_160ms_ease focusVisible:ring_3px_solid_token(colors.investment-blue-soft) focusVisible:ring-o_2px disabled:cursor_not-allowed disabled:bg_#edf1f6 disabled:bd-c_#edf1f6 disabled:c_#8ca0ba c_white bg_investment-blue bg-i_linear-gradient(180deg,_#3b7cff_0%,_#2f6fed_100%) bd_1px_solid_token(colors.investment-blue) cursor_pointer bx-sh_0_6px_14px_rgba(47,_111,_237,_0.18) hover:bg_investment-blue-dark"
+    type="button"
+  >
+    実行する
+  </button>
+  <label
+    class="d_block"
+  >
+    <span
+      class="d_block mb_3 fs_xs fw_700 c_investment-text"
+    >
+      検索入力
+    </span>
+    <span
+      class="d_flex ai_center gap_2 h_9 min-w_36 px_3 bdr_md bg_white bd_1px_solid_#cfd9e8 c_#34425c focusWithin:bd-c_investment-blue focusWithin:bx-sh_0_0_0_3px_rgba(37,_99,_235,_0.14)"
+    >
+      <input
+        class="w_full min-w_0 bg_transparent bd_0 ring_0 c_investment-text fs_sm placeholder:c_#64748b"
+        placeholder="銘柄名・コードを検索"
+      />
+    </span>
+  </label>
+  <span
+    class="d_inline-flex ai_center jc_center min-h_8 px_4 bdr_md fs_xs fw_700 white-space_nowrap bg_investment-red-soft c_investment-red"
+  >
+    Critical
+  </span>
+  <span
+    aria-label="スコア 76、注意しつつ良好"
+    class="pos_relative d_inline-flex ai_center jc_center flex-d_column bdr_full bg_white c_investment-text"
+    role="img"
+    style="width: 80px; height: 80px;"
+  >
+    <svg
+      aria-hidden="true"
+      class="pos_absolute inset_0"
+      height="80"
+      viewBox="0 0 80 80"
+      width="80"
+    >
+      <circle
+        cx="40"
+        cy="40"
+        fill="none"
+        r="36"
+        stroke="#ffd99c"
+        stroke-width="4"
+      />
+      <circle
+        cx="40"
+        cy="40"
+        fill="none"
+        r="36"
+        stroke="#fb8500"
+        stroke-dasharray="226.1946710584651"
+        stroke-dashoffset="54.286721054031624"
+        stroke-linecap="round"
+        stroke-width="4"
+        transform="rotate(-90 40 40)"
+      />
+    </svg>
+    <span
+      class="pos_relative fs_2xl fw_800 lh_1"
+    >
+      76
+    </span>
+    <span
+      class="pos_relative mt_1 fs_2xs fw_700 c_investment-orange"
+    >
+      注意しつつ良好
+    </span>
+  </span>
+  <table
+    class="w_full bd-cl_collapse fs_sm"
+  >
+    <thead>
+      <tr
+        class="c_investment-muted ta_left"
+      >
+        <th
+          class="px_3 py_2 fw_700"
+          scope="col"
+        >
+          銘柄
+        </th>
+        <th
+          class="px_3 py_2 fw_700"
+          scope="col"
+        >
+          セクター
+        </th>
+        <th
+          class="px_3 py_2 fw_700"
+          scope="col"
+        >
+          スコア
+        </th>
+        <th
+          class="px_3 py_2 fw_700"
+          scope="col"
+        >
+          判定
+        </th>
+        <th
+          class="px_3 py_2 fw_700"
+          scope="col"
+        >
+          利回り
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        class="bd-t_1px_solid_token(colors.investment-border-soft)"
+      >
+        <td
+          class="px_3 py_3 fw_700 c_investment-text"
+        >
+          三菱商事（8058）
+        </td>
+        <td
+          class="px_3 py_3 fw_700 c_investment-text"
+        >
+          商社
+        </td>
+        <td
+          class="px_3 py_3 fw_700 c_investment-text fs_xl fw_800 c_investment-green"
+        >
+          92
+        </td>
+        <td
+          class="px_3 py_3 fw_700 c_investment-text"
+        >
+          <span
+            class="d_inline-flex ai_center jc_center min-h_8 px_4 bdr_md fs_xs fw_700 white-space_nowrap bg_investment-green-soft c_investment-green"
+          >
+            安全寄り
+          </span>
+        </td>
+        <td
+          class="px_3 py_3 fw_700 c_investment-text"
+        >
+          3.7%
+        </td>
+      </tr>
+      <tr
+        class="bd-t_1px_solid_token(colors.investment-border-soft)"
+      >
+        <td
+          class="px_3 py_3 fw_700 c_investment-text"
+        >
+          NTT（9432）
+        </td>
+        <td
+          class="px_3 py_3 fw_700 c_investment-text"
+        >
+          通信
+        </td>
+        <td
+          class="px_3 py_3 fw_700 c_investment-text fs_xl fw_800 c_investment-green"
+        >
+          88
+        </td>
+        <td
+          class="px_3 py_3 fw_700 c_investment-text"
+        >
+          <span
+            class="d_inline-flex ai_center jc_center min-h_8 px_4 bdr_md fs_xs fw_700 white-space_nowrap bg_investment-green-soft c_investment-green"
+          >
+            安全寄り
+          </span>
+        </td>
+        <td
+          class="px_3 py_3 fw_700 c_investment-text"
+        >
+          3.2%
+        </td>
+      </tr>
+      <tr
+        class="bd-t_1px_solid_token(colors.investment-border-soft)"
+      >
+        <td
+          class="px_3 py_3 fw_700 c_investment-text"
+        >
+          三菱UFJ FG（8306）
+        </td>
+        <td
+          class="px_3 py_3 fw_700 c_investment-text"
+        >
+          銀行
+        </td>
+        <td
+          class="px_3 py_3 fw_700 c_investment-text fs_xl fw_800 c_investment-orange"
+        >
+          76
+        </td>
+        <td
+          class="px_3 py_3 fw_700 c_investment-text"
+        >
+          <span
+            class="d_inline-flex ai_center jc_center min-h_8 px_4 bdr_md fs_xs fw_700 white-space_nowrap bg_investment-orange-soft c_investment-orange"
+          >
+            注意しつつ良好
+          </span>
+        </td>
+        <td
+          class="px_3 py_3 fw_700 c_investment-text"
+        >
+          4.1%
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div
+    aria-labelledby="investment-dialog-title"
+    aria-modal="true"
+    class="bdr_lg bd_1px_solid_#cbd5e1 bg_white p_4"
+    role="dialog"
+  >
+    <div
+      class="d_flex jc_space-between ai_center"
+    >
+      <h3
+        class="fs_md fw_800"
+        id="investment-dialog-title"
+      >
+        確認
+      </h3>
+      <button
+        aria-label="閉じる"
+        class="c_investment-muted cursor_pointer"
+        type="button"
+      >
+        ×
+      </button>
+    </div>
+    <p
+      class="mt_5 mb_8 c_investment-muted fs_sm"
+    >
+      この操作を実行しますか？
+    </p>
+    <div
+      class="d_flex jc_flex-end gap_3"
+    >
+      <button
+        class="min-h_9 px_6 bdr_md fs_sm fw_700 trs_background-color_160ms_ease,_border-color_160ms_ease,_color_160ms_ease focusVisible:ring_3px_solid_token(colors.investment-blue-soft) focusVisible:ring-o_2px disabled:cursor_not-allowed disabled:bg_#edf1f6 disabled:bd-c_#edf1f6 disabled:c_#8ca0ba c_investment-blue bg_white bd_1px_solid_#86adff cursor_pointer hover:bg_investment-blue-soft"
+        type="button"
+      >
+        キャンセル
+      </button>
+      <button
+        class="min-h_9 px_6 bdr_md fs_sm fw_700 trs_background-color_160ms_ease,_border-color_160ms_ease,_color_160ms_ease focusVisible:ring_3px_solid_token(colors.investment-blue-soft) focusVisible:ring-o_2px disabled:cursor_not-allowed disabled:bg_#edf1f6 disabled:bd-c_#edf1f6 disabled:c_#8ca0ba c_white bg_investment-blue bg-i_linear-gradient(180deg,_#3b7cff_0%,_#2f6fed_100%) bd_1px_solid_token(colors.investment-blue) cursor_pointer bx-sh_0_6px_14px_rgba(47,_111,_237,_0.18) hover:bg_investment-blue-dark"
+        type="button"
+      >
+        実行する
+      </button>
+    </div>
+  </div>
+</div>
+`;
