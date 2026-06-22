@@ -1,282 +1,133 @@
-# 全体のルール定義
+# Project Agent Rules
 
-## 概要
+このファイルは全エージェントの入口ルールだけを定義する。詳細な役割・実装規約・ワークフローは参照先に委譲し、作業前に必要な範囲だけ読むこと。
 
-本プロジェクトはマルチエージェント構成（Codex Agents）を前提とする。
+<!-- CODEGRAPH_START -->
+## CodeGraph
 
-- 各エージェントは、`.codex/agents` に定義されており、すべての開発はこれらの役割分担に従って実行される。 
-- Codex / AIエージェントは、必ずこの AGENTS.md を起点として動作する。 
-- 開発の基本思想および、各エージェント、ワークフロー、開発のルール群を参照しながら開発を行うこと。
+`.codegraph/` があるため、コードの理解・探索・影響範囲確認では grep/find や直接読みに入る前に CodeGraph を使う。
 
-## 開発の基本思想
+- MCP が使える場合: `codegraph_explore` を優先し、必要に応じて `codegraph_node` / `codegraph_callers` を使う。
+- Shell の場合: `codegraph explore "<question or symbols>"` / `codegraph node <symbol-or-file>` を使う。
+<!-- CODEGRAPH_END -->
 
-本プロジェクトは以下を前提とする：
+## Command Efficiency
 
-- Storybook Driven Development（SDD）
-- Test Driven Development（TDD）
-- コンポーネント中心設計
-- Orval生成APIクライアント・mock前提開発
-- マルチエージェント分業開発
+シェルコマンドは原則 `rtk` を prefix して実行する。`rtk` が環境にない、またはデバッグで生出力が必要な場合のみ通常コマンドへ戻す。
 
----
+コマンドチェーンでは各 segment に `rtk` を付ける。生出力を維持しつつ計測したい場合は `rtk proxy <cmd>` を使う。
 
-## マルチエージェント構成
+例:
 
-以下のエージェントが役割分担して開発を行う：
+```bash
+rtk git status
+rtk git diff
+rtk pnpm check
+rtk test pnpm test
+```
+
+## Core Principles
+
+- Storybook Driven Development、Test Driven Development、コンポーネント中心設計を前提にする。
+- マルチエージェント分業は `.codex/agents/*.toml` の役割定義に従う。
+- フロントエンド実装は必ず `src/AGENTS.md` を起点にする。
+- Orval 生成物は `src/apis/generated` を本番コードから直接利用する。
+- `src/apis` 直下に本番用 API ラッパーや業務ロジックを追加しない。配置可能なのは Orval 共通 mutator と mock / test 用構成だけ。
+
+エージェント定義:
 
 - `.codex/agents/pm.toml`
 - `.codex/agents/tester.toml`
 - `.codex/agents/implementer.toml`
 - `.codex/agents/reviewer.toml`
- - `.codex/agents/issue_responder.toml`
+- `.codex/agents/issue_responder.toml`
 
----
+## Required References
 
-## ブランチ運用ルール（重要）
+- 開発ワークフロー: `.codex/workflows/sdd_flow.md`
+- フロントエンド全体: `src/AGENTS.md`
+- UI: `docs/rules/ui.md`
+- テスト: `docs/rules/testing.md`
+- フロントエンド実装: `docs/rules/frontend.md`
+- 状態管理: `docs/rules/state-management.md`
 
-すべての実装・修正・テスト作成は、必ずブランチを切ってから開始すること。
+API を利用する Story、test、実装、レビューでは `docs/rules/state-management.md` を必ず参照し、状態分類と管理スコープを確認する。
 
-### ブランチ命名規則
+## Branch Rule
+
+実装・修正・テスト作成を始める前に必ず作業ブランチを切る。1タスク = 1ブランチを原則とし、ブランチは短命に保つ。
+
+ブランチ名:
 
 ```txt
 <prefix>/<short-description>
 ```
 
-例
+許可 prefix:
 
-```txt
-feat/user-login-ui
-fix/button-disabled-state
-test/login-form-validation
-refactor/api-client-cleanup
-docs/storybook-guideline-update
-infra/msw-setup
-chore/update-dependencies
-```
+- `feat`: 新機能
+- `fix`: 不具合修正
+- `refactor`: 挙動を変えない改善
+- `docs`: ドキュメント
+- `test`: テスト
+- `infra`: インフラ / CI
+- `chore`: その他
 
----
+## Development Flow
 
-### ブランチプレフィックス定義
+1. PM が要件・ユーザーストーリー・タスクを整理する。
+2. Tester が RED として test / Story を作成する。
+3. Reviewer が test / Story を確認する。
+4. Implementer が最小実装で GREEN にする。
+5. Tester が検証する。
+6. Reviewer が最終確認する。
 
-#### 種別の分類
+最終確認では要件適合、Storybook の表示、ローカルサーバーでのUI / 動作、ブラウザコンソールの警告・エラーを確認する。
 
-- feat: ユーザーに価値を提供する新機能
-- fix: 不具合の修正
-- refactor: 挙動を変えない内部改善
-- docs: ドキュメントの追加・更新
-- test: テストの追加・修正
-- infra: インフラ・CI/CD・環境構築
-- chore: 上記に当てはまらない雑務（極力使わない）
+責務を越えた仕様変更、tester 不在の実装、stories なし実装、レビューなし完了、UI とロジックの混在は禁止。Implementer は仕様・test・Story・mock シナリオを書き換えて通してはならず、過剰設計も避ける。
 
----
+## Quality Gates
 
-### ブランチ作成ルール（必須）
-
-- テスト作成前に必ずブランチを作成する
-- 実装開始前に必ずブランチを作成する
-- 1タスク = 1ブランチを原則とする
-- ブランチは短命に保つ
-
----
-
-## 各エージェントの責務定義
-
-### PM（Product Manager）
-
-プロダクトの要件と開発方針を定義し、全体の設計意図とタスク構造を決定するエージェント。
-
-#### 責務
-- 要件整理・仕様の定義
-- ユーザーストーリー作成
-- タスク分解および実行順序の決定
-- 全体の指揮および各エージェントへのタスク割り振り
-- 必要に応じた軽量な設計判断（実装詳細には踏み込まない）
-
-#### 禁止事項
-- 実装詳細の決定
-- コンポーネント構造の強制
-- コードレベル設計への介入
-- テストコードの作成
-
----
-
-### Tester（テスター）
-
-仕様をテストとして具体化し、期待される振る舞いを明確に定義するエージェント。
-
-#### 参照ルール
-テスト実装ルールは `docs/rules/testing.md` を参照する
-
-#### 責務
-- テスト設計（REDフェーズ）
-- テストコード作成
-- 期待仕様の定義（UI・挙動・状態）
-- unit / integration / e2e テスト作成と実行
-- APIレスポンス仕様の定義
-- モックデータの設計
-- Orval生成mockシナリオの定義（成功・失敗・loadingなど）
-
-#### 禁止事項
-- 実装コードの作成
-- UIコンポーネント構造の決定
-- 仕様変更
-- テストを通すための仕様改変
-
----
-
-### Implementer（実装者）
-
-テストとStorybookで定義された仕様を満たすために実装を行うエージェント。
-
-#### 責務
-- 実装（GREENフェーズ）
-- `.stories.tsx` に基づいたUI実装
-- `.test.tsx` のテストを通すための最小実装
-- Storybookで確認可能な状態の構築
-- Orval生成mockシナリオ前提での実装
-
-#### 原則
-- 最小実装を優先する
-- テストを通すことが唯一の目的
-- 仕様変更は禁止
-
-#### 禁止事項
-- 仕様の変更
-- テストの書き換え
-- mockシナリオの変更
-- 過剰設計
-
----
-
-### Reviewer（レビュワー）
-
-品質・設計・ルール遵守の最終保証を行うエージェント。
-
-#### 責務
-- テスト観点のレビュー
-- StorybookでのUIレビュー
-- コードレビュー
-- 設計逸脱の検出
-- 品質・構造の検証
-- 責務分離の確認
-
-#### 禁止事項
-- 実装修正
-- テスト修正
-- 仕様変更
-
-### Issue Responder（Issue リスポンダー）
-
-人間が起票した Issue を読み取り、必要なときだけ起動して調査・暫定修正を行うエージェント。自動起動は行わず、明示的な人間のトリガーでのみ動作する。
-
-#### 起動ルール
-- エージェントは常時稼働しない。起動は人間のトリガー（Issue に `agent:run` ラベル付与、もしくは明示的コマンド）によってのみ行う。
-- 起動時は Issue の要約と影響範囲を提示し、続行許可を得てから作業する。
-
-#### 責務
-- Issue の要旨と影響範囲を解析し、関連ファイル・既存テスト・Story を特定する。
-- 必要に応じて最小の再現コード（unit テストや Storybook story）を追加して failing case を作成する。テスト追加は `test:` プレフィックスのブランチ規則に従う。
-- 再現に成功したら最小実装での修正案を作成し、`pnpm check` と `pnpm test` を実行して検証する。
-- 検証が通った修正は新しいブランチを切り（命名規則に従う）、ドラフト PR を作成して人間にレビュー依頼を出す。
-
-#### 制限・禁止事項
-- 自動で main にマージしない。必ず人間のレビューと承認を受けること。
-- テストを書かずに直接実装だけ行うことを禁止する。修正には必ず再現テストまたは Story を伴うこと。
-- 仕様変更や要件改変は行わない。仕様変更が必要な場合は PM と連携すること。
-- 外部ネットワークやサードパーティーへの変更は人間の明示的許可なしに実行しない。
-
-#### ワークフロー（起動〜PR作成）
-1. 人間が Issue にラベルまたはコマンドでエージェント起動を要求する。
-2. エージェントは Issue を要約し、影響範囲と推奨アクションを提示して続行確認を得る。
-3. 人間が許可したら最小再現コード（test/story）を追加する。
-4. Implementer 相当の最小修正を行い、`pnpm check` / `pnpm test` を実行する。
-5. 結果を添えてドラフト PR を作成し、レビュワー／実装担当者にアサインする。
-
-#### 運用上の注意
-- エージェントの実行ログと変更履歴は明示的に保存し、人間が追跡できる形にする。
-- 大規模または横断的な影響がある修正は即座にエスカレーションする。
-
----
-
-## 実装ワークフロー
-
-すべての開発は以下のワークフローに従う：
-
-```txt
-.codex/workflows/sdd_flow.md
-```
-
-## フロントエンド開発の全体ルール
-
-フロントエンド開発の実装については、以下のファイルを起点とする：
-
-```txt
-src/AGENTS.md
-```
-
-### 詳細ルール
-
-- UI実装ルール：`docs/rules/ui.md`
-- テストルール：`docs/rules/testing.md`
-- フロントエンド開発の実装ルール：`docs/rules/frontend.md`
-- 状態管理ルール：`docs/rules/state-management.md`
-
-APIを利用する機能の Story、test、実装、レビューでは、`docs/rules/state-management.md` を必ず参照し、状態分類と管理スコープを確認すること。
-
----
-
-## 開発フロー
-
-1. PM：要件整理・タスク分解
-2. PM：ユーザーストーリー作成
-3. Tester：ブランチを切る
-4. Tester：テスト設計・テストコード作成（RED）
-5. Reviewer：テストコードレビュー
-6. Implementer：実装（GREEN）
-7. Tester：テスト実行による検証およびレビュー
-8. Reviewer：最終レビュー
-  - 要件を満たしているか確認
-  - Storybookでコンポーネント確認（UIチェック）
-  - ローカルサーバーを起動してブラウザで確認（UI・動作チェック）
-    - ブラウザのデベロッパーツールのコンソールで警告やエラーを確認（必要に応じて修正する）
-9. 必要に応じて修正ループ
-
-## 禁止事項
-
-- エージェント責務の逸脱
-- implementerによる仕様変更
-- tester不在の実装
-- storiesなし実装
-- レビューなしでの完了扱い
-- UIとロジックの混在
-- ブランチ未作成での作業開始
-
-## 品質保証ルール
-
-すべてのコード変更後は必ず以下を実行すること：
+コード変更後は必ず実行する。
 
 ```bash
 pnpm check
 ```
 
-さらにテストが存在する場合：
+テストが存在する場合:
 
 ```bash
 pnpm test
 ```
 
-E2Eテストが存在する場合：
+E2E が存在する場合:
 
 ```bash
 pnpm test:e2e
 ```
 
----
+完了条件は `pnpm check`、該当テスト、Storybook / UI 確認、レビューが通っていること。
 
-## 必須条件
+## Issue Responder
 
-- pnpm check が通ること
-- pnpm test がすべてパスすること
-- pnpm test:e2e がある場合はすべてパスすること
-- Storybookで破綻がないこと
-- レビューで承認されていること
+Issue 対応エージェントは人間の明示トリガーがある場合だけ動作する。起動時は Issue 要約、影響範囲、推奨アクションを提示し、続行許可を得てから作業する。
+
+修正には再現 test または Story を伴わせ、検証後にドラフト PR を作成する。main への自動マージ、仕様変更、明示許可のない外部ネットワーク変更は禁止。
+
+Issue 対応の実行ログと変更履歴は、人間が追跡できる形で Issue / PR に残す。大規模または横断的な影響がある修正は即座にエスカレーションする。
+
+## Memory
+
+タスク終了時、必要に応じて `agent-memory` を更新する。秘密情報・個人情報・一時的な雑ログは保存しない。
+
+- 長期的な設計判断: `agent-memory write --target long_term --content "..."`
+- 当日の作業ログ: `agent-memory write --target daily --content "..."`
+- 未完了 TODO: `agent-memory scratchpad add --text "..."`
+
+ユーザーが「前回の続き」「再開」「続きから」「思い出して」と依頼した場合は、作業前に scratchpad、daily の直近日付ログ、long_term の関連判断を確認し、次の形式で短く報告する。
+
+```txt
+前回やっていたこと:
+未完了 TODO:
+今回最初にやること:
+```

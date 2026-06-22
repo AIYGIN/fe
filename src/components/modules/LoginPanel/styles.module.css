@@ -1,0 +1,104 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 20% 12%, rgb(66 133 244 / 14%), transparent 22rem),
+    linear-gradient(180deg, #f7f8fb 0%, #eef2f6 100%);
+  color: #172033;
+  padding: 32px 20px;
+}
+
+.panel {
+  width: min(100%, 420px);
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 16px 42px rgb(31 45 61 / 10%);
+  padding: clamp(28px, 6vw, 40px);
+}
+
+.eyebrow {
+  color: #506176;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.title {
+  margin-top: 10px;
+  color: #111827;
+  font-size: clamp(1.6rem, 5vw, 2rem);
+  line-height: 1.2;
+}
+
+.description {
+  margin-top: 14px;
+  color: #59677a;
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+.status {
+  min-height: 24px;
+  margin-top: 20px;
+  color: #59677a;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.error {
+  color: #b42318;
+  font-weight: 650;
+}
+
+.button {
+  display: inline-flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 22px;
+  border: 1px solid #cfd8e3;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #172033;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 750;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.button::before {
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 50%;
+  background: #4285f4;
+  color: #ffffff;
+  content: "G";
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.button:hover:not(:disabled) {
+  border-color: #4285f4;
+  box-shadow: 0 8px 18px rgb(66 133 244 / 16%);
+  transform: translateY(-1px);
+}
+
+.button:focus-visible {
+  outline: 3px solid rgb(66 133 244 / 28%);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

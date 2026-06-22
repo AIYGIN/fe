@@ -13,10 +13,12 @@ export function TodoBoard({
   initialFilter,
   initialDraft,
   initialValidationError,
+  accountPanel,
 }: TodoBoardProps) {
   return (
     <main className={styles.shell}>
       <div className={styles.container}>
+        {accountPanel}
         <TodoHeader />
         <section className={styles.panel} aria-label="TODO管理">
           <TodoComposer

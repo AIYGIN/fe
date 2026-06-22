@@ -1,6 +1,6 @@
 const defaultApiHost = "http://localhost:3001";
 
-const getApiHost = () =>
+export const getApiHost = () =>
   (process.env.NEXT_PUBLIC_API_HOST || defaultApiHost).replace(/\/+$/, "");
 
 export const request = async <T>(
