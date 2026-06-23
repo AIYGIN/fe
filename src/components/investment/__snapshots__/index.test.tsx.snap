@@ -3,7 +3,7 @@
 exports[`investment components > 主要コンポーネントを再利用可能な公開entrypointから描画できる 1`] = `
 <div>
   <button
-    class="min-h_9 px_6 bdr_md fs_sm fw_700 trs_background-color_160ms_ease,_border-color_160ms_ease,_color_160ms_ease focusVisible:ring_3px_solid_token(colors.investment-blue-soft) focusVisible:ring-o_2px disabled:cursor_not-allowed disabled:bg_#edf1f6 disabled:bd-c_#edf1f6 disabled:c_#8ca0ba c_white bg_investment-blue bg-i_linear-gradient(180deg,_#3b7cff_0%,_#2f6fed_100%) bd_1px_solid_token(colors.investment-blue) cursor_pointer bx-sh_0_6px_14px_rgba(47,_111,_237,_0.18) hover:bg_investment-blue-dark"
+    class="d_inline-flex ai_center jc_center gap_2 min-h_9 px_6 bdr_md fs_sm fw_700 trs_background-color_160ms_ease,_border-color_160ms_ease,_color_160ms_ease focusVisible:ring_3px_solid_token(colors.investment-blue-soft) focusVisible:ring-o_2px disabled:cursor_not-allowed disabled:bg_#edf1f6 disabled:bd-c_#edf1f6 disabled:c_#8ca0ba c_white bg_investment-blue bg-i_linear-gradient(180deg,_#3b7cff_0%,_#2f6fed_100%) bd_1px_solid_token(colors.investment-blue) cursor_pointer bx-sh_0_6px_14px_rgba(47,_111,_237,_0.18) hover:bg_investment-blue-dark"
     type="button"
   >
     実行する
@@ -248,13 +248,13 @@ exports[`investment components > 主要コンポーネントを再利用可能�
       class="d_flex jc_flex-end gap_3"
     >
       <button
-        class="min-h_9 px_6 bdr_md fs_sm fw_700 trs_background-color_160ms_ease,_border-color_160ms_ease,_color_160ms_ease focusVisible:ring_3px_solid_token(colors.investment-blue-soft) focusVisible:ring-o_2px disabled:cursor_not-allowed disabled:bg_#edf1f6 disabled:bd-c_#edf1f6 disabled:c_#8ca0ba c_investment-blue bg_white bd_1px_solid_#86adff cursor_pointer hover:bg_investment-blue-soft"
+        class="d_inline-flex ai_center jc_center gap_2 min-h_9 px_6 bdr_md fs_sm fw_700 trs_background-color_160ms_ease,_border-color_160ms_ease,_color_160ms_ease focusVisible:ring_3px_solid_token(colors.investment-blue-soft) focusVisible:ring-o_2px disabled:cursor_not-allowed disabled:bg_#edf1f6 disabled:bd-c_#edf1f6 disabled:c_#8ca0ba c_investment-blue bg_white bd_1px_solid_#86adff cursor_pointer hover:bg_investment-blue-soft"
         type="button"
       >
         キャンセル
       </button>
       <button
-        class="min-h_9 px_6 bdr_md fs_sm fw_700 trs_background-color_160ms_ease,_border-color_160ms_ease,_color_160ms_ease focusVisible:ring_3px_solid_token(colors.investment-blue-soft) focusVisible:ring-o_2px disabled:cursor_not-allowed disabled:bg_#edf1f6 disabled:bd-c_#edf1f6 disabled:c_#8ca0ba c_white bg_investment-blue bg-i_linear-gradient(180deg,_#3b7cff_0%,_#2f6fed_100%) bd_1px_solid_token(colors.investment-blue) cursor_pointer bx-sh_0_6px_14px_rgba(47,_111,_237,_0.18) hover:bg_investment-blue-dark"
+        class="d_inline-flex ai_center jc_center gap_2 min-h_9 px_6 bdr_md fs_sm fw_700 trs_background-color_160ms_ease,_border-color_160ms_ease,_color_160ms_ease focusVisible:ring_3px_solid_token(colors.investment-blue-soft) focusVisible:ring-o_2px disabled:cursor_not-allowed disabled:bg_#edf1f6 disabled:bd-c_#edf1f6 disabled:c_#8ca0ba c_white bg_investment-blue bg-i_linear-gradient(180deg,_#3b7cff_0%,_#2f6fed_100%) bd_1px_solid_token(colors.investment-blue) cursor_pointer bx-sh_0_6px_14px_rgba(47,_111,_237,_0.18) hover:bg_investment-blue-dark"
         type="button"
       >
         実行する

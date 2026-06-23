@@ -61,6 +61,8 @@ APIを利用する機能の Story、test、実装、レビューでは、`docs/r
 - `src/components/templates/<TemplateName>/index.tsx`：page.tsx から呼び出す画面構成
 - `src/components/modules/<ModuleName>/index.tsx`：template が組み合わせる画面内UI単位
 - `src/components/common/<ComponentName>/index.tsx`：複数template / moduleで再利用する共通UI
+- `src/components/<DesignSystemName>/parts/<ModuleName>/index.tsx`：デザインシステム固有の最小UIパーツ。例: `src/components/investment/parts/Button/index.tsx`
+- `src/components/<DesignSystemName>/modules/<ModuleName>/index.tsx`：同一デザインシステム内の `parts` を組み合わせて作成するUI単位。例: `src/components/investment/modules/PortfolioSummary/index.tsx`
 - module内の子コンポーネントも `<ComponentName>/index.tsx` に配置する
 
 依存方向は次に限定する：
@@ -81,6 +83,9 @@ src/app/**/page.tsx
 - `modules` はUIと局所状態を担当し、store / APIを直接importせず `hooks` の公開adapterを利用する
 - `components` から `src/stores` / `src/apis` への直接importは禁止する
 - template / moduleの外部公開は `index.tsx` に限定し、内部ファイルをdeep importしない
+- デザインシステム固有UIの公開entrypointは `src/components/<DesignSystemName>/index.ts` に集約し、利用側は `src/components/<DesignSystemName>/parts/<ModuleName>` を直接 deep import しない
+- デザインシステム固有UIを追加する場合は、`src/components/<DesignSystemName>/<ModuleName>` 直下ではなく、必ず `src/components/<DesignSystemName>/parts/<ModuleName>/index.tsx` に配置する
+- 複数の `parts` を組み合わせるUIは最小パーツではないため、`src/components/<DesignSystemName>/modules/<ModuleName>/index.tsx` に配置する
 - コンポーネントを `ComponentName.tsx` として親ディレクトリ直下へ配置することは禁止する
 - CSS、型、定数などコンポーネントではないmodule共有資産はmodule直下に配置してよい
 

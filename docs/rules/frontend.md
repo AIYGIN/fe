@@ -45,6 +45,8 @@ Next.js App Router 用ディレクトリ。
 - `templates/<TemplateName>/index.tsx`：page単位の画面構成
 - `modules/<ModuleName>/index.tsx`：template内で組み合わせるUI単位
 - `common/<ComponentName>/index.tsx`：複数画面で再利用するUI
+- `<DesignSystemName>/parts/<ModuleName>/index.tsx`：デザインシステム固有の最小UIパーツ。例: `investment/parts/Button/index.tsx`
+- `<DesignSystemName>/modules/<ModuleName>/index.tsx`：同一デザインシステム内の `parts` を組み合わせて作成するUI単位。例: `investment/modules/PortfolioSummary/index.tsx`
 - module内の子コンポーネント：`<ComponentName>/index.tsx`
 - stories / tests
 
@@ -60,6 +62,9 @@ app/page.tsx -> templates -> modules -> hooks -> stores -> apis
 - component間の逆向き依存、moduleからtemplateへのimportを禁止する
 - test / storyを除き、componentsから`src/stores`と`src/apis`への直接importを禁止する
 - 各template / moduleの外部公開は`index.tsx`へ限定し、内部実装のdeep importを避ける
+- デザインシステム固有UIは `src/components/<DesignSystemName>/index.ts` を公開entrypointとし、利用側から `src/components/<DesignSystemName>/parts/<ModuleName>` を直接 deep import しない
+- デザインシステム固有UIを追加する場合は、`src/components/<DesignSystemName>/<ModuleName>` 直下ではなく、必ず `src/components/<DesignSystemName>/parts/<ModuleName>/index.tsx` に配置する
+- 複数の `parts` を組み合わせるUIは最小パーツではないため、`src/components/<DesignSystemName>/modules/<ModuleName>/index.tsx` に配置する
 - コンポーネントごとにディレクトリを作り、実装は必ず`<ComponentName>/index.tsx`へ配置する
 - CSS、型、定数などコンポーネントではない共有資産は所属するtemplate / module直下へ配置してよい
 - 新規コンポーネントを追加する前に `src/components/common`、feature共通領域、対象feature配下の既存コンポーネントを確認する
