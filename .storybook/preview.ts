@@ -2,6 +2,7 @@ import type { Preview } from "@storybook/nextjs-vite";
 
 import { initialize, mswLoader } from "msw-storybook-addon";
 import { getTodosMock } from "../src/apis/generated/todos/todos.msw";
+import "../src/app/globals.css";
 
 initialize({ onUnhandledRequest: "warn" }, getTodosMock());
 
