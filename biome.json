@@ -15,7 +15,6 @@
       "!dist",
       "!build",
       "!src/apis/generated",
-      "!src/stories",
       "!public/mockServiceWorker.js"
     ]
   },
