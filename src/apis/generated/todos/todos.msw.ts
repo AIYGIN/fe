@@ -26,6 +26,8 @@ export const getTodoControllerGetTodosResponseMock = (): TodoDto[] => (Array.fro
 
 export const getTodoControllerCreateTodoResponseMock = (overrideResponse: Partial<Extract<TodoDto, object>> = {}): TodoDto => ({id: faker.string.alpha({length: {min: 10, max: 20}}), title: faker.string.alpha({length: {min: 10, max: 20}}), completed: faker.datatype.boolean(), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
 
+export const getTodoControllerGetTodoResponseMock = (overrideResponse: Partial<Extract<TodoDto, object>> = {}): TodoDto => ({id: faker.string.alpha({length: {min: 10, max: 20}}), title: faker.string.alpha({length: {min: 10, max: 20}}), completed: faker.datatype.boolean(), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
+
 export const getTodoControllerUpdateTodoResponseMock = (overrideResponse: Partial<Extract<TodoDto, object>> = {}): TodoDto => ({id: faker.string.alpha({length: {min: 10, max: 20}}), title: faker.string.alpha({length: {min: 10, max: 20}}), completed: faker.datatype.boolean(), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
 
 
@@ -49,6 +51,18 @@ export const getTodoControllerCreateTodoMockHandler = (overrideResponse?: TodoDt
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
     : getTodoControllerCreateTodoResponseMock(),
       { status: 201
+      })
+  }, options)
+}
+
+export const getTodoControllerGetTodoMockHandler = (overrideResponse?: TodoDto | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<TodoDto> | TodoDto), options?: RequestHandlerOptions) => {
+  return http.get('*/todos/:id', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getTodoControllerGetTodoResponseMock(),
+      { status: 200
       })
   }, options)
 }
@@ -77,6 +91,7 @@ export const getTodoControllerUpdateTodoMockHandler = (overrideResponse?: TodoDt
 export const getTodosMock = () => [
   getTodoControllerGetTodosMockHandler(),
   getTodoControllerCreateTodoMockHandler(),
+  getTodoControllerGetTodoMockHandler(),
   getTodoControllerDeleteTodoMockHandler(),
   getTodoControllerUpdateTodoMockHandler()
 ]

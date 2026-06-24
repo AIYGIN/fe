@@ -20,6 +20,22 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## TODO BFF疎通
+
+`/todo` はデフォルトでブラウザMSWを有効化せず、Orval生成clientからBFFへ接続します。BFF hostは `NEXT_PUBLIC_API_HOST` を指定した場合はその値、未指定時は `http://localhost:3001` を使います。
+
+```bash
+NEXT_PUBLIC_API_HOST=http://localhost:3001 pnpm dev
+```
+
+Storybookやブラウザ上でTODO APIをMSWへ向けたい場合だけ、次の環境変数を指定します。
+
+```bash
+NEXT_PUBLIC_TODO_ENABLE_BROWSER_MOCK=true pnpm dev
+```
+
+実BFF疎通では、BFF側でCookie credential付きCORSを許可し、ログイン済みのHttpOnly Cookieが送信される状態で確認します。TODO所有者はBFFがCookie内JWTから復元するため、FEは `userId` / `ownerUserId` / `ownerDisplayName` をrequest body/queryへ渡しません。API契約が `TodoDto(id,title,completed,createdAt)`、`CreateTodoRequestDto(title)`、`UpdateTodoRequestDto(completed)` から変わらない場合、`src/apis/generated` 配下のOrval生成物は変更しません。
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

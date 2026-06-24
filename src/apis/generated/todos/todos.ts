@@ -19,6 +19,11 @@ export type todoControllerGetTodosResponse200 = {
   status: 200
 }
 
+export type todoControllerGetTodosResponse401 = {
+  data: ErrorResponseSchema
+  status: 401
+}
+
 export type todoControllerGetTodosResponse500 = {
   data: ErrorResponseSchema
   status: 500
@@ -27,7 +32,7 @@ export type todoControllerGetTodosResponse500 = {
 export type todoControllerGetTodosResponseSuccess = (todoControllerGetTodosResponse200) & {
   headers: Headers;
 };
-export type todoControllerGetTodosResponseError = (todoControllerGetTodosResponse500) & {
+export type todoControllerGetTodosResponseError = (todoControllerGetTodosResponse401 | todoControllerGetTodosResponse500) & {
   headers: Headers;
 };
 
@@ -42,7 +47,7 @@ export const getTodoControllerGetTodosUrl = () => {
 }
 
 /**
- * TODO一覧を作成日時の新しい順で取得する。
+ * ログイン済みユーザーのTODO一覧を作成日時の新しい順で取得する。
  * @summary TODO一覧取得
  */
 export const todoControllerGetTodos = async ( options?: RequestInit): Promise<todoControllerGetTodosResponse> => {
@@ -67,6 +72,11 @@ export type todoControllerCreateTodoResponse400 = {
   status: 400
 }
 
+export type todoControllerCreateTodoResponse401 = {
+  data: ErrorResponseSchema
+  status: 401
+}
+
 export type todoControllerCreateTodoResponse500 = {
   data: ErrorResponseSchema
   status: 500
@@ -75,7 +85,7 @@ export type todoControllerCreateTodoResponse500 = {
 export type todoControllerCreateTodoResponseSuccess = (todoControllerCreateTodoResponse201) & {
   headers: Headers;
 };
-export type todoControllerCreateTodoResponseError = (todoControllerCreateTodoResponse400 | todoControllerCreateTodoResponse500) & {
+export type todoControllerCreateTodoResponseError = (todoControllerCreateTodoResponse400 | todoControllerCreateTodoResponse401 | todoControllerCreateTodoResponse500) & {
   headers: Headers;
 };
 
@@ -90,7 +100,7 @@ export const getTodoControllerCreateTodoUrl = () => {
 }
 
 /**
- * 指定されたタイトルで新しいTODOを作成する。作成直後の completed は false として返す。
+ * ログイン済みユーザーのTODOとして、指定されたタイトルで新しいTODOを作成する。作成直後の completed は false として返す。
  * @summary TODO作成
  */
 export const todoControllerCreateTodo = async (createTodoRequestDto: CreateTodoRequestDto, options?: RequestInit): Promise<todoControllerCreateTodoResponse> => {
@@ -105,9 +115,72 @@ export const todoControllerCreateTodo = async (createTodoRequestDto: CreateTodoR
 );}
 
 
+export type todoControllerGetTodoResponse200 = {
+  data: TodoDto
+  status: 200
+}
+
+export type todoControllerGetTodoResponse400 = {
+  data: ErrorResponseSchema
+  status: 400
+}
+
+export type todoControllerGetTodoResponse401 = {
+  data: ErrorResponseSchema
+  status: 401
+}
+
+export type todoControllerGetTodoResponse404 = {
+  data: ErrorResponseSchema
+  status: 404
+}
+
+export type todoControllerGetTodoResponse500 = {
+  data: ErrorResponseSchema
+  status: 500
+}
+
+export type todoControllerGetTodoResponseSuccess = (todoControllerGetTodoResponse200) & {
+  headers: Headers;
+};
+export type todoControllerGetTodoResponseError = (todoControllerGetTodoResponse400 | todoControllerGetTodoResponse401 | todoControllerGetTodoResponse404 | todoControllerGetTodoResponse500) & {
+  headers: Headers;
+};
+
+export type todoControllerGetTodoResponse = (todoControllerGetTodoResponseSuccess | todoControllerGetTodoResponseError)
+
+export const getTodoControllerGetTodoUrl = (id: string,) => {
+
+
+
+
+  return `/todos/${id}`
+}
+
+/**
+ * ログイン済みユーザーが所有する指定TODOを取得する。
+ * @summary TODO取得
+ */
+export const todoControllerGetTodo = async (id: string, options?: RequestInit): Promise<todoControllerGetTodoResponse> => {
+
+  return request<todoControllerGetTodoResponse>(getTodoControllerGetTodoUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
 export type todoControllerDeleteTodoResponse204 = {
   data: void
   status: 204
+}
+
+export type todoControllerDeleteTodoResponse401 = {
+  data: ErrorResponseSchema
+  status: 401
 }
 
 export type todoControllerDeleteTodoResponse404 = {
@@ -123,7 +196,7 @@ export type todoControllerDeleteTodoResponse500 = {
 export type todoControllerDeleteTodoResponseSuccess = (todoControllerDeleteTodoResponse204) & {
   headers: Headers;
 };
-export type todoControllerDeleteTodoResponseError = (todoControllerDeleteTodoResponse404 | todoControllerDeleteTodoResponse500) & {
+export type todoControllerDeleteTodoResponseError = (todoControllerDeleteTodoResponse401 | todoControllerDeleteTodoResponse404 | todoControllerDeleteTodoResponse500) & {
   headers: Headers;
 };
 
@@ -138,7 +211,7 @@ export const getTodoControllerDeleteTodoUrl = (id: string,) => {
 }
 
 /**
- * 指定したTODOを削除する。成功時はレスポンス body を返さない。
+ * ログイン済みユーザーが所有する指定TODOを削除する。成功時はレスポンス body を返さない。
  * @summary TODO削除
  */
 export const todoControllerDeleteTodo = async (id: string, options?: RequestInit): Promise<todoControllerDeleteTodoResponse> => {
@@ -163,6 +236,11 @@ export type todoControllerUpdateTodoResponse400 = {
   status: 400
 }
 
+export type todoControllerUpdateTodoResponse401 = {
+  data: ErrorResponseSchema
+  status: 401
+}
+
 export type todoControllerUpdateTodoResponse404 = {
   data: ErrorResponseSchema
   status: 404
@@ -176,7 +254,7 @@ export type todoControllerUpdateTodoResponse500 = {
 export type todoControllerUpdateTodoResponseSuccess = (todoControllerUpdateTodoResponse200) & {
   headers: Headers;
 };
-export type todoControllerUpdateTodoResponseError = (todoControllerUpdateTodoResponse400 | todoControllerUpdateTodoResponse404 | todoControllerUpdateTodoResponse500) & {
+export type todoControllerUpdateTodoResponseError = (todoControllerUpdateTodoResponse400 | todoControllerUpdateTodoResponse401 | todoControllerUpdateTodoResponse404 | todoControllerUpdateTodoResponse500) & {
   headers: Headers;
 };
 
@@ -191,7 +269,7 @@ export const getTodoControllerUpdateTodoUrl = (id: string,) => {
 }
 
 /**
- * 指定したTODOの完了状態を更新し、更新後のTODOを返す。
+ * ログイン済みユーザーが所有する指定TODOの完了状態を更新し、更新後のTODOを返す。
  * @summary TODO完了状態更新
  */
 export const todoControllerUpdateTodo = async (id: string,

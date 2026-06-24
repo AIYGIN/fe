@@ -9,7 +9,7 @@ export default defineConfig({
   },
 
   webServer: {
-    command: "pnpm dev",
+    command: "NEXT_PUBLIC_TODO_ENABLE_BROWSER_MOCK=true pnpm dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
   },
