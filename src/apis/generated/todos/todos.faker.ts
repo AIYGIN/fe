@@ -18,5 +18,7 @@ export const getTodoControllerGetTodosResponseMock = (): TodoDto[] => (Array.fro
 
 export const getTodoControllerCreateTodoResponseMock = (overrideResponse: Partial<Extract<TodoDto, object>> = {}): TodoDto => ({id: faker.string.alpha({length: {min: 10, max: 20}}), title: faker.string.alpha({length: {min: 10, max: 20}}), completed: faker.datatype.boolean(), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
 
+export const getTodoControllerGetTodoResponseMock = (overrideResponse: Partial<Extract<TodoDto, object>> = {}): TodoDto => ({id: faker.string.alpha({length: {min: 10, max: 20}}), title: faker.string.alpha({length: {min: 10, max: 20}}), completed: faker.datatype.boolean(), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
+
 export const getTodoControllerUpdateTodoResponseMock = (overrideResponse: Partial<Extract<TodoDto, object>> = {}): TodoDto => ({id: faker.string.alpha({length: {min: 10, max: 20}}), title: faker.string.alpha({length: {min: 10, max: 20}}), completed: faker.datatype.boolean(), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', ...overrideResponse})
 
