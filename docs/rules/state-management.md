@@ -279,3 +279,6 @@ Providerはstore初期値と自動取得の開始責務を持つ。selector hook
 - [ ] 非同期成功・失敗・再試行・重複防止がtestで保証されている
 - [ ] 古いレスポンス、二重submit、unmount後更新などの競合を考慮している
 - [ ] 現行採用技術とIssue要件に沿い、不要なライブラリを追加していない
+# 状態管理の技術固定
+
+状態管理の技術選定は `docs/rules/tech-stack.md` に従う。API状態、画面横断状態、リトライ可能な非同期状態、ページ遷移後も扱う状態は Zustand store として設計し、実装者判断で hook local state のみに閉じない。

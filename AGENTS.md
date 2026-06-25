@@ -41,6 +41,7 @@ rtk test pnpm test
 - Storybook Driven Development、Test Driven Development、コンポーネント中心設計を前提にする。
 - マルチエージェント分業は `.codex/agents/*.toml` の役割定義に従う。
 - フロントエンド実装は必ず `src/AGENTS.md` を起点にする。
+- 実装技術は `docs/rules/tech-stack.md` に従う。Store / Zod / PandaCSS / Orval / MSW を使わない判断は実装者が独自に行わない。
 - Orval 生成物は `src/apis/generated` を本番コードから直接利用する。
 - `src/apis` 直下に本番用 API ラッパーや業務ロジックを追加しない。配置可能なのは Orval 共通 mutator と mock / test 用構成だけ。
 
@@ -56,6 +57,7 @@ rtk test pnpm test
 
 - 開発ワークフロー: `.codex/workflows/sdd_flow.md`
 - フロントエンド全体: `src/AGENTS.md`
+- 技術スタック: `docs/rules/tech-stack.md`
 - UI: `docs/rules/ui.md`
 - テスト: `docs/rules/testing.md`
 - フロントエンド実装: `docs/rules/frontend.md`
