@@ -17,7 +17,17 @@
 - [ ] {{tasks}}
 
 ## 受け入れ条件
-- {{acceptance_criteria}}
+### コンポーネント設計準拠
+- [ ] {{component_acceptance_criteria}}
+
+### Store設計準拠
+- [ ] {{store_acceptance_criteria}}
+
+### 機能・表示
+- [ ] {{functional_acceptance_criteria}}
+
+### テスト・Storybook
+- [ ] {{test_acceptance_criteria}}
 
 ## 補足
 {{notes}}
