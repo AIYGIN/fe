@@ -1,7 +1,15 @@
-import type { CSSProperties } from "react";
-
 import type { PortfolioRequestStatus } from "@/hooks/portfolio/usePortfolio";
 import type { PortfolioData } from "@/lib/pages/portfolio/holdings";
+
+import { css } from "../../../../styled-system/css";
+import { InvestmentPanel } from "../../investment/modules/InvestmentPanel";
+import { InvestmentRatioBar } from "../../investment/modules/InvestmentRatioBar";
+import { PortfolioAiSummarySection } from "../../investment/modules/PortfolioAiSummarySection";
+import { PortfolioBrokerLinkSection } from "../../investment/modules/PortfolioBrokerLinkSection";
+import { PortfolioConstituentsSection } from "../../investment/modules/PortfolioConstituentsSection";
+import { PortfolioHeader } from "../../investment/modules/PortfolioHeader";
+import { PortfolioHoldingsSection } from "../../investment/modules/PortfolioHoldingsSection";
+import { PortfolioRatioBreakdownSection } from "../../investment/modules/PortfolioRatioBreakdownSection";
 
 export type PortfolioHoldingsViewState = {
   holdingsStatus: PortfolioRequestStatus;
@@ -19,278 +27,428 @@ export type PortfolioHoldingsTemplateProps = {
 
 export function PortfolioHoldingsTemplate({
   state,
-  externalLinkUrl = "https://www.rakuten-sec.co.jp/",
+  externalLinkUrl = "https://site.sbisec.co.jp/account/nisa/portfolio",
   brokerLinkUrl,
   onRetry,
 }: PortfolioHoldingsTemplateProps) {
   const linkUrl = brokerLinkUrl ?? externalLinkUrl;
   const isHoldingsLoading = state.holdingsStatus === "loading";
   const isAnalysisLoading = state.analysisStatus === "loading";
+  const lastUpdated =
+    state.data?.lastUpdated.analysis || state.data?.lastUpdated.holdings;
 
   return (
-    <main aria-label="portfolio holdings" style={styles.page}>
-      <section style={styles.header}>
-        <div>
-          <p style={styles.eyebrow}>Portfolio</p>
-          <h1 style={styles.title}>ポートフォリオ</h1>
-        </div>
-        <a
-          href={linkUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={styles.externalLink}
-        >
-          証券口座を連携
-        </a>
-      </section>
+    <main aria-label="portfolio holdings" className={pageClass}>
+      <PortfolioHeader lastUpdated={lastUpdated} onRefresh={onRetry} />
 
       {isHoldingsLoading ? (
-        <output aria-live="polite" style={styles.card}>
-          保有商品を読み込み中です
-        </output>
+        <StatusPanel message="保有商品を読み込み中です" />
       ) : null}
 
       {state.holdingsStatus === "not-found" ? (
-        <section style={styles.card}>
-          <h2 style={styles.sectionTitle}>ポートフォリオが見つかりません</h2>
-          <p style={styles.muted}>保有商品はまだありません</p>
-        </section>
+        <StatusPanel
+          message="ポートフォリオが見つかりません"
+          subMessage="保有商品はまだありません"
+        />
       ) : null}
 
       {state.holdingsStatus === "error" ? (
-        <section role="alert" style={styles.card}>
-          <h2 style={styles.sectionTitle}>
-            ポートフォリオを取得できませんでした
-          </h2>
-          <p style={styles.muted}>
-            {state.error ?? "時間をおいてもう一度お試しください。"}
-          </p>
-          <button type="button" onClick={onRetry} style={styles.button}>
-            再試行
-          </button>
-        </section>
+        <StatusPanel
+          message="ポートフォリオを取得できませんでした"
+          onRetry={onRetry}
+          subMessage={state.error ?? "時間をおいてもう一度お試しください。"}
+        />
       ) : null}
 
       {state.data ? (
-        <div style={styles.grid}>
-          <section aria-label="保有商品" style={styles.card}>
-            <div style={styles.sectionHeader}>
-              <h2 style={styles.sectionTitle}>保有商品</h2>
-              <span style={styles.muted}>
-                更新 {formatDateTime(state.data.lastUpdated.holdings)}
-              </span>
-            </div>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>商品名</th>
-                  <th style={styles.numericTh}>構成比</th>
-                </tr>
-              </thead>
-              <tbody>
-                {state.data.holdings.map((holding) => (
-                  <tr key={holding.holdingId}>
-                    <td style={styles.td}>{holding.productName}</td>
-                    <td style={styles.numericTd}>
-                      {formatPercent(holding.ratio)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
+        <>
+          <div className={topGridClass}>
+            <PortfolioHoldingsSection holdings={state.data.holdings} />
+            <PortfolioBrokerLinkSection linkUrl={linkUrl} />
+          </div>
 
-          <section style={styles.card}>
-            <div style={styles.sectionHeader}>
-              <h2 style={styles.sectionTitle}>分析比率</h2>
-              <span style={styles.muted}>
-                更新 {formatDateTime(state.data.lastUpdated.analysis)}
-              </span>
-            </div>
-            {isAnalysisLoading ? (
-              <output aria-live="polite" style={styles.muted}>
-                分析を取得中
-              </output>
-            ) : (
-              <div style={styles.analysisGrid}>
-                <RatioList
-                  title="資産配分"
-                  items={state.data.analysis.sectorAllocations ?? []}
-                />
-                <RatioList
-                  title="構成銘柄"
-                  items={state.data.analysis.constituents ?? []}
-                />
-                <RatioList
-                  title="AIサマリー"
-                  items={state.data.analysis.countryAllocations ?? []}
-                />
-              </div>
-            )}
-          </section>
-        </div>
+          <div className={middleGridClass}>
+            <PortfolioRatioBreakdownSection
+              items={state.data.analysis.sectorAllocations ?? []}
+              title="セクター比率（全体）"
+            />
+            <PortfolioConstituentsSection
+              items={state.data.analysis.constituents ?? []}
+            />
+            <PortfolioRatioBreakdownSection
+              items={state.data.analysis.countryAllocations ?? []}
+              title="国・地域別比率（全体）"
+            />
+          </div>
+
+          <div className={bottomGridClass}>
+            <BiasCheckSection data={state.data} />
+            <PortfolioAiSummarySection isLoading={isAnalysisLoading} />
+          </div>
+
+          <DataNote onRefresh={onRetry} />
+        </>
       ) : null}
     </main>
   );
 }
 
-type RatioItem = PortfolioData["analysis"]["sectorAllocations"][number];
-
-function RatioList({ title, items }: { title: string; items: RatioItem[] }) {
+function StatusPanel({
+  message,
+  subMessage,
+  onRetry,
+}: {
+  message: string;
+  subMessage?: string;
+  onRetry?: () => void;
+}) {
   return (
-    <section aria-label={title} style={styles.ratioPanel}>
-      <h3 style={styles.ratioTitle}>{title}</h3>
-      <ul style={styles.ratioList}>
-        {items.map((item) => (
-          <li key={item.name} style={styles.ratioItem}>
-            <span>{item.name}</span>
-            <strong>{formatPercent(item.ratio)}</strong>
-          </li>
+    <InvestmentPanel>
+      <div className={statusClass} role={onRetry ? "alert" : "status"}>
+        <h2>{message}</h2>
+        {subMessage ? <p>{subMessage}</p> : null}
+        {onRetry ? (
+          <button className={retryButtonClass} onClick={onRetry} type="button">
+            再試行
+          </button>
+        ) : null}
+      </div>
+    </InvestmentPanel>
+  );
+}
+
+function BiasCheckSection({ data }: { data: PortfolioData }) {
+  const countryTop = data.analysis.countryAllocations?.[0];
+  const sectorTop = data.analysis.sectorAllocations?.[0];
+  const holdingTop = data.holdings[0];
+  const checks = [
+    {
+      label: `${countryTop?.name ?? "主要国"}比率`,
+      ratio: countryTop?.ratio ?? 0,
+      target: "目安：50%以下",
+      result: (countryTop?.ratio ?? 0) > 50 ? "やや高め" : "適正範囲内",
+      tone: (countryTop?.ratio ?? 0) > 50 ? "amber" : "green",
+    },
+    {
+      label: `${sectorTop?.name ?? "主要セクター"}比率`,
+      ratio: sectorTop?.ratio ?? 0,
+      target: "目安：20%前後",
+      result: (sectorTop?.ratio ?? 0) > 20 ? "やや高め" : "適正範囲内",
+      tone: (sectorTop?.ratio ?? 0) > 20 ? "amber" : "green",
+    },
+    {
+      label: `高配当比率（${holdingTop?.productName ?? "保有商品"}系）`,
+      ratio: holdingTop?.ratio ?? 0,
+      target: "目安：20〜30%",
+      result:
+        (holdingTop?.ratio ?? 0) >= 20 && (holdingTop?.ratio ?? 0) <= 30
+          ? "適正範囲内"
+          : "要確認",
+      tone:
+        (holdingTop?.ratio ?? 0) >= 20 && (holdingTop?.ratio ?? 0) <= 30
+          ? "green"
+          : "amber",
+    },
+    {
+      label: "新興国比率",
+      ratio:
+        data.analysis.countryAllocations?.find((item) =>
+          item.name.includes("新興"),
+        )?.ratio ?? 0,
+      target: "目安：5〜20%",
+      result: "適正範囲内",
+      tone: "green",
+    },
+    {
+      label: "債券比率",
+      ratio: 0,
+      target: "目安：必要に応じて検討",
+      result: "未保有",
+      tone: "gray",
+    },
+  ] as const;
+
+  return (
+    <InvestmentPanel
+      className={biasPanelClass}
+      title="偏りチェック（自動判定）"
+    >
+      <div className={biasTableClass}>
+        <div className={biasHeadClass}>
+          <span />
+          <span>倍持</span>
+          <span>許容範囲内</span>
+          <span>概要</span>
+          <span />
+        </div>
+        {checks.map((check) => (
+          <div className={biasRowClass} key={check.label}>
+            <span className={statusIconClass} data-tone={check.tone}>
+              {check.tone === "green" ? "✓" : check.tone === "gray" ? "−" : "△"}
+            </span>
+            <strong>{check.label}</strong>
+            <span className={biasValueClass}>{formatPercent(check.ratio)}</span>
+            <span>{check.target}</span>
+            <span>{check.result}</span>
+            <InvestmentRatioBar tone={check.tone} value={check.ratio} />
+          </div>
         ))}
-      </ul>
+      </div>
+      <div className={infoClass}>
+        <strong>i</strong>
+        <p>
+          偏りチェックは一般的な考え方に基づく目安です。
+          <br />
+          最終的な投資判断はご自身の方針に基づいて行ってください。
+        </p>
+      </div>
+    </InvestmentPanel>
+  );
+}
+
+function DataNote({ onRefresh }: { onRefresh?: () => void }) {
+  return (
+    <section className={dataNoteClass}>
+      <div className={dataTextClass}>
+        <strong>i</strong>
+        <div>
+          <h2>データについて</h2>
+          <p>
+            本画面のデータは、各ETFの公開情報をもとに算出しています。
+            <br />
+            構成銘柄・比率は日々変動するため、実際の数値と異なる場合があります。
+          </p>
+        </div>
+      </div>
+      <button className={dataButtonClass} onClick={onRefresh} type="button">
+        ↻ データの更新
+      </button>
     </section>
   );
 }
 
 function formatPercent(value: number): string {
-  return `${value.toFixed(1)}%`;
+  return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatDateTime(value: string): string {
-  return new Intl.DateTimeFormat("ja-JP", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
+const pageClass = css({
+  bg: "#f8fafc",
+  color: "#111827",
+  minH: "100%",
+  p: { base: "18px", md: "32px" },
+});
 
-const styles = {
-  page: {
-    minHeight: "100%",
-    background: "#ffffff",
-    color: "#162033",
-    padding: "32px",
+const topGridClass = css({
+  display: "grid",
+  gap: "16px",
+  gridTemplateColumns: {
+    base: "1fr",
+    lg: "minmax(0, 1.65fr) minmax(320px, 1fr)",
   },
-  header: {
-    alignItems: "center",
-    borderBottom: "1px solid #dce5f2",
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "24px",
-    paddingBottom: "20px",
+  mb: "16px",
+});
+
+const middleGridClass = css({
+  display: "grid",
+  gap: "16px",
+  gridTemplateColumns: { base: "1fr", xl: "repeat(3, minmax(0, 1fr))" },
+  mb: "16px",
+});
+
+const bottomGridClass = css({
+  display: "grid",
+  gap: "16px",
+  gridTemplateColumns: {
+    base: "1fr",
+    xl: "minmax(0, 1.55fr) minmax(340px, 1fr)",
   },
-  eyebrow: {
-    color: "#2563eb",
-    fontSize: "13px",
-    fontWeight: 700,
-    margin: "0 0 4px",
-  },
-  title: {
-    fontSize: "28px",
-    lineHeight: 1.3,
-    margin: 0,
-  },
-  externalLink: {
-    border: "1px solid #2563eb",
-    borderRadius: "6px",
-    color: "#2563eb",
-    fontWeight: 700,
-    padding: "10px 14px",
-    textDecoration: "none",
-  },
-  grid: {
-    display: "grid",
-    gap: "20px",
-    gridTemplateColumns: "minmax(0, 1fr)",
-  },
-  card: {
-    background: "#ffffff",
-    border: "1px solid #dce5f2",
-    borderRadius: "8px",
-    boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
-    padding: "20px",
-  },
-  sectionHeader: {
-    alignItems: "center",
-    display: "flex",
-    gap: "12px",
-    justifyContent: "space-between",
-    marginBottom: "16px",
-  },
-  sectionTitle: {
+  mb: "16px",
+});
+
+const statusClass = css({
+  alignItems: "flex-start",
+  display: "flex",
+  flexDir: "column",
+  gap: "12px",
+  "& h2": {
+    color: "#111827",
     fontSize: "18px",
-    lineHeight: 1.4,
-    margin: 0,
+    fontWeight: 800,
+    m: 0,
   },
-  muted: {
-    color: "#5f6f86",
+  "& p": {
+    color: "#64748b",
     fontSize: "14px",
-    margin: 0,
+    fontWeight: 600,
+    m: 0,
   },
-  table: {
-    borderCollapse: "collapse",
-    width: "100%",
+});
+
+const retryButtonClass = css({
+  bg: "#1268df",
+  border: 0,
+  borderRadius: "6px",
+  color: "white",
+  cursor: "pointer",
+  fontWeight: 800,
+  mt: "4px",
+  px: "16px",
+  py: "10px",
+});
+
+const biasPanelClass = css({
+  minH: "420px",
+});
+
+const biasTableClass = css({
+  display: "grid",
+});
+
+const biasHeadClass = css({
+  borderBottom: "1px solid",
+  borderColor: "#dbe3ef",
+  color: "#64748b",
+  display: "grid",
+  fontSize: "12px",
+  fontWeight: 800,
+  gridTemplateColumns:
+    "24px minmax(120px, 1fr) 78px minmax(120px, 1fr) 92px 90px",
+  pb: "10px",
+});
+
+const biasRowClass = css({
+  alignItems: "center",
+  borderBottom: "1px solid",
+  borderColor: "#e5eaf2",
+  color: "#111827",
+  display: "grid",
+  fontSize: "13px",
+  fontWeight: 700,
+  gap: "12px",
+  gridTemplateColumns: {
+    base: "24px minmax(0, 1fr) 70px",
+    md: "24px minmax(120px, 1fr) 78px minmax(120px, 1fr) 92px 90px",
   },
-  th: {
-    borderBottom: "1px solid #dce5f2",
-    color: "#5f6f86",
-    fontSize: "13px",
-    padding: "10px 8px",
-    textAlign: "left",
+  minH: "48px",
+  py: "8px",
+  "& > span:nth-of-type(3), & > span:nth-of-type(4)": {
+    display: { base: "none", md: "block" },
   },
-  numericTh: {
-    borderBottom: "1px solid #dce5f2",
-    color: "#5f6f86",
-    fontSize: "13px",
-    padding: "10px 8px",
-    textAlign: "right",
+  "& > span:nth-of-type(4)": {
+    color: "#334155",
   },
-  td: {
-    borderBottom: "1px solid #eef3f8",
-    padding: "12px 8px",
+  "& > span:last-child": {
+    display: { base: "none", md: "block" },
   },
-  numericTd: {
-    borderBottom: "1px solid #eef3f8",
-    fontVariantNumeric: "tabular-nums",
-    fontWeight: 700,
-    padding: "12px 8px",
-    textAlign: "right",
-  },
-  analysisGrid: {
-    display: "grid",
-    gap: "16px",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  },
-  ratioPanel: {
-    border: "1px solid #eef3f8",
-    borderRadius: "6px",
-    padding: "14px",
-  },
-  ratioTitle: {
-    color: "#24344d",
-    fontSize: "15px",
-    margin: "0 0 10px",
-  },
-  ratioList: {
-    display: "grid",
-    gap: "8px",
-    listStyle: "none",
-    margin: 0,
-    padding: 0,
-  },
-  ratioItem: {
+});
+
+const statusIconClass = css({
+  alignItems: "center",
+  borderRadius: "999px",
+  color: "white",
+  display: "inline-flex",
+  fontSize: "13px",
+  fontWeight: 900,
+  h: "18px",
+  justifyContent: "center",
+  w: "18px",
+  "&[data-tone='amber']": { bg: "#f59e0b" },
+  "&[data-tone='green']": { bg: "#43bf73" },
+  "&[data-tone='gray']": { bg: "#94a3b8" },
+});
+
+const biasValueClass = css({
+  fontVariantNumeric: "tabular-nums",
+  fontWeight: 900,
+});
+
+const infoClass = css({
+  alignItems: "flex-start",
+  bg: "#eaf4ff",
+  borderRadius: "6px",
+  color: "#1268df",
+  display: "flex",
+  gap: "12px",
+  mt: "18px",
+  px: "16px",
+  py: "12px",
+  "& strong": {
     alignItems: "center",
-    display: "flex",
-    gap: "12px",
-    justifyContent: "space-between",
+    border: "1px solid",
+    borderColor: "#1268df",
+    borderRadius: "999px",
+    display: "inline-flex",
+    flexShrink: 0,
+    fontSize: "12px",
+    h: "18px",
+    justifyContent: "center",
+    w: "18px",
   },
-  button: {
-    background: "#2563eb",
-    border: 0,
-    borderRadius: "6px",
-    color: "#ffffff",
-    cursor: "pointer",
+  "& p": {
+    fontSize: "13px",
     fontWeight: 700,
-    marginTop: "16px",
-    padding: "10px 14px",
+    lineHeight: 1.65,
+    m: 0,
   },
-} satisfies Record<string, CSSProperties>;
+});
+
+const dataNoteClass = css({
+  alignItems: { base: "flex-start", md: "center" },
+  bg: "#f1f7ff",
+  border: "1px solid",
+  borderColor: "#bfdbfe",
+  borderRadius: "8px",
+  display: "flex",
+  flexDir: { base: "column", md: "row" },
+  gap: "18px",
+  justifyContent: "space-between",
+  p: "18px 22px",
+});
+
+const dataTextClass = css({
+  alignItems: "flex-start",
+  color: "#0f172a",
+  display: "flex",
+  gap: "12px",
+  "& strong": {
+    alignItems: "center",
+    border: "1px solid",
+    borderColor: "#1268df",
+    borderRadius: "999px",
+    color: "#1268df",
+    display: "inline-flex",
+    flexShrink: 0,
+    fontSize: "12px",
+    h: "18px",
+    justifyContent: "center",
+    mt: "2px",
+    w: "18px",
+  },
+  "& h2": {
+    fontSize: "14px",
+    fontWeight: 900,
+    lineHeight: 1.4,
+    m: 0,
+  },
+  "& p": {
+    color: "#475569",
+    fontSize: "12px",
+    fontWeight: 700,
+    lineHeight: 1.65,
+    m: "8px 0 0",
+  },
+});
+
+const dataButtonClass = css({
+  bg: "white",
+  border: "1px solid",
+  borderColor: "#cbd5e1",
+  borderRadius: "6px",
+  color: "#0f172a",
+  cursor: "pointer",
+  flexShrink: 0,
+  fontSize: "14px",
+  fontWeight: 800,
+  px: "18px",
+  py: "10px",
+});

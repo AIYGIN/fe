@@ -2,37 +2,40 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import type { PortfolioHoldingsViewState } from ".";
-import { PortfolioHoldingsTemplate } from ".";
+import {
+  PortfolioHoldingsTemplate,
+  type PortfolioHoldingsViewState,
+} from "./index";
 
-const loadedState = {
+const loadedState: PortfolioHoldingsViewState = {
   holdingsStatus: "success",
   analysisStatus: "success",
   data: {
     holdings: [
       {
         holdingId: "hold-1",
-        productName: "eMAXIS Slim 全世界株式",
-        ratio: 62.4,
+        productName: "eMAXIS Slim 全世界株式（オルカン）",
+        ratio: 80,
       },
       {
         holdingId: "hold-2",
-        productName: "S&P 500 ETF",
-        ratio: 37.6,
+        productName: "SCHD（Schwab U.S. Dividend Equity ETF）",
+        ratio: 20,
       },
     ],
     analysis: {
       sectorAllocations: [
-        { name: "情報技術", ratio: 28.5 },
-        { name: "金融", ratio: 16.2 },
+        { name: "情報技術", ratio: 26 },
+        { name: "金融", ratio: 14.2 },
+        { name: "ヘルスケア", ratio: 12.1 },
       ],
       constituents: [
-        { name: "Apple", ratio: 7.8 },
-        { name: "Microsoft", ratio: 6.9 },
+        { name: "Apple Inc.", ratio: 4.2 },
+        { name: "Microsoft Corp.", ratio: 3.6 },
       ],
       countryAllocations: [
-        { name: "米国", ratio: 71.1 },
-        { name: "日本", ratio: 8.4 },
+        { name: "米国", ratio: 59.1 },
+        { name: "日本", ratio: 6.1 },
       ],
     },
     lastUpdated: {
@@ -41,46 +44,72 @@ const loadedState = {
     },
   },
   error: null,
-} satisfies PortfolioHoldingsViewState;
+};
 
 describe("PortfolioHoldingsTemplate", () => {
-  it("holdings が取得済みで analysis が loading の間も保有商品を後続表示する", () => {
+  it("参考画像の主要領域を分割コンポーネントで表示する", () => {
+    render(<PortfolioHoldingsTemplate state={loadedState} />);
+
+    expect(
+      screen.getByRole("heading", { name: "ポートフォリオ" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "保有商品（手入力）" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "SBI証券で確認する" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "セクター比率（全体）" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "上位10銘柄（全体）" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "国・地域別比率（全体）" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "偏りチェック（自動判定）" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "AI要約（Coming Soon）" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "データについて" }),
+    ).toBeInTheDocument();
+  });
+
+  it("保有商品とOrval由来の分析データを表示する", () => {
+    render(<PortfolioHoldingsTemplate state={loadedState} />);
+
+    expect(
+      screen.getByText("eMAXIS Slim 全世界株式（オルカン）"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("SCHD（Schwab U.S. Dividend Equity ETF）"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("情報技術")).toBeInTheDocument();
+    expect(screen.getByText("Apple Inc.")).toBeInTheDocument();
+    expect(screen.getByText("米国")).toBeInTheDocument();
+    expect(screen.getAllByText("80%").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("20%").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("analysis loading中も他セクションを表示し、AI要約だけbusyにする", () => {
     render(
       <PortfolioHoldingsTemplate
         state={{ ...loadedState, analysisStatus: "loading" }}
       />,
     );
 
+    expect(screen.getByText("情報技術")).toBeInTheDocument();
+    expect(screen.getByText("Apple Inc.")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "ポートフォリオ" }),
+      screen.getByText("AIによるポートフォリオ分析と要約を準備中です"),
     ).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "保有商品" })).toHaveTextContent(
-      "eMAXIS Slim 全世界株式",
-    );
-    expect(screen.getByRole("region", { name: "保有商品" })).toHaveTextContent(
-      "62.4%",
-    );
-    expect(screen.getByText("分析を取得中")).toBeInTheDocument();
   });
 
-  it("分析結果として比率内訳・構成銘柄・AIサマリーを表示する", () => {
-    render(<PortfolioHoldingsTemplate state={loadedState} />);
-
-    expect(screen.getByRole("region", { name: "資産配分" })).toHaveTextContent(
-      "情報技術",
-    );
-    expect(screen.getByRole("region", { name: "資産配分" })).toHaveTextContent(
-      "28.5%",
-    );
-    expect(screen.getByRole("region", { name: "構成銘柄" })).toHaveTextContent(
-      "Apple",
-    );
-    expect(
-      screen.getByRole("region", { name: "AIサマリー" }),
-    ).toHaveTextContent("米国");
-  });
-
-  it("404 の場合は空状態として案内し、通常のエラーアラートを出さない", () => {
+  it("404は画面全体の状態として表示する", () => {
     render(
       <PortfolioHoldingsTemplate
         state={{
@@ -96,27 +125,22 @@ describe("PortfolioHoldingsTemplate", () => {
       screen.getByRole("heading", { name: "ポートフォリオが見つかりません" }),
     ).toBeInTheDocument();
     expect(screen.getByText("保有商品はまだありません")).toBeInTheDocument();
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
-  it("取得エラーの場合は再試行できるエラー表示を出す", async () => {
-    const user = userEvent.setup();
+  it("errorは画面全体の状態としてretryできる", async () => {
     const onRetry = vi.fn();
+    const user = userEvent.setup();
 
     render(
       <PortfolioHoldingsTemplate
+        onRetry={onRetry}
         state={{
           holdingsStatus: "error",
           analysisStatus: "idle",
           data: null,
           error: "ポートフォリオを取得できませんでした。",
         }}
-        onRetry={onRetry}
       />,
-    );
-
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "ポートフォリオを取得できませんでした。",
     );
 
     await user.click(screen.getByRole("button", { name: "再試行" }));
@@ -124,15 +148,17 @@ describe("PortfolioHoldingsTemplate", () => {
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
-  it("証券口座連携は外部リンクとして安全な属性を付与する", () => {
+  it("証券リンクは未実装導線として外部リンクを開く", () => {
     render(
       <PortfolioHoldingsTemplate
-        state={loadedState}
         brokerLinkUrl="https://www.rakuten-sec.co.jp/"
+        state={loadedState}
       />,
     );
 
-    const link = screen.getByRole("link", { name: "証券口座を連携" });
+    const link = screen.getByRole("link", {
+      name: "SBI証券 NISAポートフォリオへ ↗",
+    });
     expect(link).toHaveAttribute("href", "https://www.rakuten-sec.co.jp/");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");

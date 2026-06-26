@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import type { PortfolioData } from "@/lib/pages/portfolio/holdings";
+
 import {
   loadPortfolioAnalysis,
   loadPortfolioHoldings,
+  type PortfolioData,
   PortfolioLoadError,
 } from "@/lib/pages/portfolio/holdings";
 
@@ -15,17 +16,7 @@ export type PortfolioRequestStatus =
   | "not-found"
   | "error";
 
-export type PortfolioState = {
-  holdingsStatus: PortfolioRequestStatus;
-  analysisStatus: PortfolioRequestStatus;
-  data: PortfolioData | null;
-  error: string | null;
-  loadPortfolio: () => Promise<void>;
-  load: () => Promise<void>;
-  resetError: () => void;
-};
-
-export function usePortfolio(): PortfolioState {
+export function usePortfolio() {
   const [holdingsStatus, setHoldingsStatus] =
     useState<PortfolioRequestStatus>("idle");
   const [analysisStatus, setAnalysisStatus] =
@@ -33,15 +24,25 @@ export function usePortfolio(): PortfolioState {
   const [data, setData] = useState<PortfolioData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const resetError = useCallback(() => {
+    setError(null);
+    if (holdingsStatus === "error" || holdingsStatus === "not-found") {
+      setHoldingsStatus("idle");
+    }
+    if (analysisStatus === "error" || analysisStatus === "not-found") {
+      setAnalysisStatus("idle");
+    }
+  }, [analysisStatus, holdingsStatus]);
+
   const load = useCallback(async () => {
-    setHoldingsStatus("loading");
-    setAnalysisStatus("idle");
     setError(null);
     setData(null);
+    setHoldingsStatus("loading");
+    setAnalysisStatus("idle");
 
     try {
       const holdingsData = await loadPortfolioHoldings();
-      const partialPortfolio: PortfolioData = {
+      const emptyData: PortfolioData = {
         holdings: holdingsData.holdings,
         analysis: {
           sectorAllocations: [],
@@ -50,16 +51,17 @@ export function usePortfolio(): PortfolioState {
         },
         lastUpdated: {
           holdings: holdingsData.lastUpdated.holdings,
-          analysis: holdingsData.lastUpdated.holdings,
+          analysis: "",
         },
       };
-      setData(partialPortfolio);
+
+      setData(emptyData);
       setHoldingsStatus("success");
       setAnalysisStatus("loading");
 
       const analysisData = await loadPortfolioAnalysis(holdingsData.holdings);
       setData({
-        ...partialPortfolio,
+        holdings: holdingsData.holdings,
         analysis: analysisData.analysis,
         lastUpdated: {
           holdings: holdingsData.lastUpdated.holdings,
@@ -67,24 +69,25 @@ export function usePortfolio(): PortfolioState {
         },
       });
       setAnalysisStatus("success");
-    } catch (caught) {
-      if (caught instanceof PortfolioLoadError && caught.kind === "not-found") {
-        setData(null);
-        setHoldingsStatus("not-found");
-        setAnalysisStatus("idle");
-        return;
-      }
+    } catch (caughtError) {
+      const loadError =
+        caughtError instanceof PortfolioLoadError
+          ? caughtError
+          : new PortfolioLoadError(
+              "Portfolio holdings could not be loaded.",
+              500,
+              "error",
+            );
 
-      setHoldingsStatus((status) => (status === "success" ? status : "error"));
-      setAnalysisStatus("error");
-      setError("ポートフォリオを取得できませんでした。");
+      setData(null);
+      setError(
+        loadError.kind === "not-found"
+          ? "保有商品はまだありません。"
+          : "時間をおいてもう一度お試しください。",
+      );
+      setHoldingsStatus(loadError.kind);
+      setAnalysisStatus(loadError.kind);
     }
-  }, []);
-
-  const resetError = useCallback(() => {
-    setError(null);
-    setHoldingsStatus((status) => (status === "error" ? "idle" : status));
-    setAnalysisStatus((status) => (status === "error" ? "idle" : status));
   }, []);
 
   return {

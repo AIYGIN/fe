@@ -62,8 +62,11 @@ export const Default: Story = {
       canvas.getByRole("heading", { name: "ポートフォリオ" }),
     ).toBeInTheDocument();
     await expect(
-      canvas.getByRole("region", { name: "保有商品" }),
-    ).toHaveTextContent("eMAXIS Slim 全世界株式");
+      canvas.getByRole("heading", { name: "保有商品（手入力）" }),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByText("eMAXIS Slim 全世界株式"),
+    ).toBeInTheDocument();
   },
 };
 
