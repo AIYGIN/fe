@@ -65,7 +65,11 @@ export function PortfolioHoldingsTemplate({
     state.data?.lastUpdated.analysis || state.data?.lastUpdated.holdings;
 
   return (
-    <main aria-label="portfolio holdings" className={pageClass}>
+    <main
+      aria-label="portfolio holdings"
+      className={pageClass}
+      style={{ padding: "clamp(18px, 2.7vw, 32px)" }}
+    >
       <PortfolioHeader lastUpdated={lastUpdated} onRefresh={onRetry} />
 
       {isHoldingsLoading ? (
@@ -235,7 +239,7 @@ function BiasCheckSection({ data }: { data: PortfolioData }) {
 
 function DataNote({ onRefresh }: { onRefresh?: () => void }) {
   return (
-    <section className={dataNoteClass}>
+    <section className={dataNoteClass} style={{ padding: "18px 22px" }}>
       <div className={dataTextClass}>
         <strong>i</strong>
         <div>
@@ -261,8 +265,10 @@ function formatPercent(value: number): string {
 const pageClass = css({
   bg: "#f8fafc",
   color: "#111827",
+  display: "grid",
+  gap: "16px",
   minH: "100%",
-  p: { base: "18px", md: "32px" },
+  padding: { base: "18px", md: "32px" },
 });
 
 const topGridClass = css({
@@ -278,7 +284,7 @@ const topGridClass = css({
 const middleGridClass = css({
   display: "grid",
   gap: "16px",
-  gridTemplateColumns: { base: "1fr", xl: "repeat(3, minmax(0, 1fr))" },
+  gridTemplateColumns: { base: "1fr", lg: "repeat(3, minmax(0, 1fr))" },
   mb: "16px",
 });
 
@@ -287,7 +293,7 @@ const bottomGridClass = css({
   gap: "16px",
   gridTemplateColumns: {
     base: "1fr",
-    xl: "minmax(0, 1.55fr) minmax(340px, 1fr)",
+    lg: "minmax(0, 1.55fr) minmax(340px, 1fr)",
   },
   mb: "16px",
 });
@@ -429,7 +435,7 @@ const dataNoteClass = css({
   flexDir: { base: "column", md: "row" },
   gap: "18px",
   justifyContent: "space-between",
-  p: "18px 22px",
+  padding: "18px 22px",
 });
 
 const dataTextClass = css({

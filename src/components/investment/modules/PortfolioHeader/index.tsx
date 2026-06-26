@@ -89,6 +89,6 @@ const refreshButtonClass = css({
   h: "28px",
   justifyContent: "center",
   lineHeight: 1,
-  p: 0,
+  padding: 0,
   w: "28px",
 });

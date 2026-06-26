@@ -18,7 +18,10 @@ export function InvestmentPanel({
   className,
 }: InvestmentPanelProps) {
   return (
-    <section className={cx(panelClass, className)}>
+    <section
+      className={cx(panelClass, className)}
+      style={{ padding: "clamp(20px, 2vw, 24px)" }}
+    >
       {title || description || action ? (
         <div className={headerClass}>
           <div>
@@ -42,7 +45,7 @@ const panelClass = css({
   borderRadius: "8px",
   boxShadow: "0 1px 2px rgba(15, 23, 42, 0.03)",
   minW: 0,
-  p: { base: "18px", md: "22px" },
+  padding: { base: "20px", md: "24px" },
 });
 
 const headerClass = css({

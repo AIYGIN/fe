@@ -86,7 +86,7 @@ const listClass = css({
   lineHeight: 1.65,
   listStyle: "disc",
   m: "14px 0 0",
-  p: 0,
+  padding: 0,
   textAlign: "left",
 });
 

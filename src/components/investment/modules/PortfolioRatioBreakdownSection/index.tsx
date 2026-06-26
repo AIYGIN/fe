@@ -72,8 +72,8 @@ function formatPercent(value: number): string {
 const contentClass = css({
   alignItems: "center",
   display: "grid",
-  gap: "24px",
-  gridTemplateColumns: { base: "1fr", md: "178px minmax(0, 1fr)" },
+  gap: "14px",
+  gridTemplateColumns: { base: "1fr", md: "154px minmax(0, 1fr)" },
   minH: "270px",
 });
 
@@ -82,17 +82,17 @@ const legendClass = css({
   gap: "10px",
   listStyle: "none",
   m: 0,
-  p: 0,
+  padding: 0,
 });
 
 const legendItemClass = css({
   alignItems: "center",
   color: "#111827",
   display: "grid",
-  fontSize: "13px",
+  fontSize: "12px",
   fontWeight: 700,
-  gap: "10px",
-  gridTemplateColumns: "10px minmax(0, 1fr) 58px",
+  gap: "8px",
+  gridTemplateColumns: "8px minmax(0, 1fr) 44px",
 });
 
 const dotClass = css({
@@ -102,8 +102,6 @@ const dotClass = css({
 });
 
 const nameClass = css({
-  overflow: "hidden",
-  textOverflow: "ellipsis",
   whiteSpace: "nowrap",
 });
 
