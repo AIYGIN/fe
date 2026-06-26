@@ -151,7 +151,6 @@ function StatusPanel({
 function BiasCheckSection({ data }: { data: PortfolioData }) {
   const countryTop = data.analysis.countryAllocations?.[0];
   const sectorTop = data.analysis.sectorAllocations?.[0];
-  const holdingTop = data.holdings[0];
   const checks = [
     {
       label: `${countryTop?.name ?? "主要国"}比率`,
