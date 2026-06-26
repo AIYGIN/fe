@@ -1,4 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -6,6 +7,7 @@ import {
   loadPortfolioHoldings,
   PortfolioLoadError,
 } from "@/lib/pages/portfolio/holdings";
+import { PortfolioStoreProvider } from "@/stores/portfolio/provider";
 
 import { usePortfolio } from "./usePortfolio";
 
@@ -69,7 +71,9 @@ describe("usePortfolio", () => {
       }),
     );
 
-    const { result } = renderHook(() => usePortfolio());
+    const { result } = renderHook(() => usePortfolio(), {
+      wrapper: PortfolioTestProvider,
+    });
 
     act(() => {
       void result.current.load();
@@ -99,7 +103,9 @@ describe("usePortfolio", () => {
       new PortfolioLoadError("not found", 404, "not-found"),
     );
 
-    const { result } = renderHook(() => usePortfolio());
+    const { result } = renderHook(() => usePortfolio(), {
+      wrapper: PortfolioTestProvider,
+    });
 
     await act(async () => {
       await result.current.load();
@@ -116,7 +122,9 @@ describe("usePortfolio", () => {
       new PortfolioLoadError("server error", 500, "error"),
     );
 
-    const { result } = renderHook(() => usePortfolio());
+    const { result } = renderHook(() => usePortfolio(), {
+      wrapper: PortfolioTestProvider,
+    });
 
     await act(async () => {
       await result.current.load();
@@ -128,3 +136,7 @@ describe("usePortfolio", () => {
     expect(result.current.error).toBe("時間をおいてもう一度お試しください。");
   });
 });
+
+function PortfolioTestProvider({ children }: { children: ReactNode }) {
+  return <PortfolioStoreProvider>{children}</PortfolioStoreProvider>;
+}
