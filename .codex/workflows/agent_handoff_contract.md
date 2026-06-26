@@ -9,7 +9,8 @@
 
 ## Required fields
 
-すべての agent handoff では、以下の項目を基本フィールドとして扱う。
+ここでの Required fields は、agent 間で次工程へ渡す handoff JSON に必須の項目です。
+各 agent の通常出力は agent 定義の schema を優先し、次 agent へ作業を渡す場合だけ、この handoff fields を満たしてください。
 
 - `task`: 次 agent が実行する具体タスク
 - `goal`: 達成すべき状態
@@ -21,6 +22,8 @@
 - `context_used`: 現 agent が実際に判断に使ったファイル・ログ・Issue・PR・スクリーンショット
 - `deferred_findings`: 今回は扱わない指摘
 - `resolved_findings`: 今回解決した指摘
+
+通常出力と handoff 出力を混同しないでください。たとえば reviewer が最終 pass を返すだけなら `next_agent` は不要です。一方、reviewer が implementer に修正を戻す場合は、`next_agent`, `task`, `context_files`, `open_findings`, `latest_command_result`, `context_used` を含む handoff として返します。
 
 ## Forbidden context
 
