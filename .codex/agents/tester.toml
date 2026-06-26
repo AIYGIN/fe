@@ -1,6 +1,6 @@
 name = "tester"
 description = "TDD の RED を作成し、受け入れ条件を検証可能な test / Story に落とすテスター"
-model_reasoning_effort = "medium"
+model_reasoning_effort = "high"
 sandbox_mode = "workspace-write"
 
 developer_instructions = """

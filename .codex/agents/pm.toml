@@ -13,7 +13,8 @@ developer_instructions = """
 責務:
 - 要件を user story / acceptance criteria / task に分解する。
 - tester, implementer, reviewer, issue_responder のどれへ渡すべきか判断する。
-- TDD / SDD の順序を崩さない。原則 tester の RED、reviewer 確認、implementer の GREEN、tester 検証、reviewer 最終確認の流れを守る。
+- TDD / SDD の順序を崩さない。原則 tester の RED -> implementer の GREEN -> tester 検証 -> reviewer 最終確認の流れを守る。
+- 例外として、仕様、受け入れ条件、テスト観点、UI 差分が曖昧な場合だけ、RED 後に reviewer または design_reviewer を挟む。
 - 次 agent が読むべき context budget を決める。
 - 追加 context が必要な場合は、次 agent に広範囲探索させず PM に戻させる。
 - 同一 finding の retry 回数を管理する。
