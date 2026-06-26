@@ -21,7 +21,6 @@ export function PortfolioBrokerLinkSection({
       >
         SBI証券 NISAポートフォリオへ ↗
       </a>
-      <p className={urlClass}>{linkUrl}</p>
       <p className={noteClass}>※ 新しいタブでSBI証券のページが開きます</p>
     </InvestmentPanel>
   );
@@ -40,15 +39,6 @@ const buttonClass = css({
   minH: "54px",
   textDecoration: "none",
   w: "100%",
-});
-
-const urlClass = css({
-  color: "#1268df",
-  fontSize: "15px",
-  fontWeight: 700,
-  lineHeight: 1.6,
-  m: "18px 0 0",
-  overflowWrap: "anywhere",
 });
 
 const noteClass = css({
