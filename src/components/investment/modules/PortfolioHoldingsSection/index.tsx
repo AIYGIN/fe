@@ -28,14 +28,8 @@ export function PortfolioHoldingsSection({
           <span>投資比率</span>
         </div>
         {holdings.map((holding, index) => (
-          <div className={rowClass} key={holding.holdingId}>
+          <div className={rowClass} key={`${holding.holdingId}-${index}`}>
             <div className={productClass}>
-              <span
-                className={logoClass}
-                data-tone={index === 0 ? "blue" : "amber"}
-              >
-                {index === 0 ? "◎" : "SCHD"}
-              </span>
               <span>{holding.productName}</span>
             </div>
             <strong className={ratioClass}>
@@ -118,21 +112,6 @@ const productClass = css({
   fontWeight: 800,
   gap: "14px",
   minW: 0,
-});
-
-const logoClass = css({
-  alignItems: "center",
-  borderRadius: "4px",
-  color: "white",
-  display: "inline-flex",
-  flexShrink: 0,
-  fontSize: "11px",
-  fontWeight: 800,
-  h: "28px",
-  justifyContent: "center",
-  w: "34px",
-  "&[data-tone='blue']": { bg: "#1268df" },
-  "&[data-tone='amber']": { bg: "#f5ae32" },
 });
 
 const ratioClass = css({

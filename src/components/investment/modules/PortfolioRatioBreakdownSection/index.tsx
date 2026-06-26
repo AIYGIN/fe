@@ -38,8 +38,8 @@ export function PortfolioRatioBreakdownSection({
       <div className={contentClass}>
         <InvestmentDonutChart items={donutItems} />
         <ul className={legendClass}>
-          {donutItems.map((item) => (
-            <li className={legendItemClass} key={item.name}>
+          {donutItems.map((item, index) => (
+            <li className={legendItemClass} key={`${item.name}-${index}`}>
               <span
                 className={dotClass}
                 style={{ backgroundColor: item.color }}
@@ -73,7 +73,7 @@ const contentClass = css({
   alignItems: "center",
   display: "grid",
   gap: "14px",
-  gridTemplateColumns: { base: "1fr", md: "154px minmax(0, 1fr)" },
+  gridTemplateColumns: { base: "1fr", md: "176px minmax(0, 1fr)" },
   minH: "270px",
 });
 
@@ -102,6 +102,8 @@ const dotClass = css({
 });
 
 const nameClass = css({
+  overflow: "hidden",
+  textOverflow: "ellipsis",
   whiteSpace: "nowrap",
 });
 

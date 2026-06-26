@@ -23,7 +23,7 @@ export function PortfolioConstituentsSection({
           <span>比率</span>
         </div>
         {topItems.map((item, index) => (
-          <div className={rowClass} key={item.name}>
+          <div className={rowClass} key={`${item.name}-${index}`}>
             <span className={rankClass}>{index + 1}</span>
             <span className={logoClass}>{getLogoText(item.name)}</span>
             <span className={nameClass}>{item.name}</span>
