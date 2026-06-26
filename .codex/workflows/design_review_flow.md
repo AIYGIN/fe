@@ -30,7 +30,7 @@ Design Review はデザインのみを扱う。次の領域はレビューしな
 - Implementer: `.codex/agents/implementer.toml`
 - Final Review: `.codex/agents/reviewer.toml`
 
-既存の `.codex/agents/designer.toml` は、実装前のコンポーネント設計Issue化に使う。
+既存の `.codex/agents/design_planner.toml` は、実装前のコンポーネント設計Issue化に使う。
 このワークフローの Design Review は、Issue要件・参照画像・実装画面の照合に特化する。
 
 ## 基本ルート
