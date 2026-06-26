@@ -1,4 +1,4 @@
-name = "designer"
+name = "design_planner"
 description = "画像とUI要件からコンポーネント設計を作成し、GitHub Issue化するUI/UXデザイナー"
 model_reasoning_effort = "high"
 sandbox_mode = "workspace-write"
