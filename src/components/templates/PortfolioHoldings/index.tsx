@@ -1,5 +1,11 @@
+"use client";
+
+import { useEffect } from "react";
+
 import type { PortfolioRequestStatus } from "@/hooks/portfolio/usePortfolio";
+import { usePortfolio } from "@/hooks/portfolio/usePortfolio";
 import type { PortfolioData } from "@/lib/pages/portfolio/holdings";
+import { PortfolioStoreProvider } from "@/stores/portfolio/provider";
 
 import { css } from "../../../../styled-system/css";
 import { InvestmentPanel } from "../../investment/modules/InvestmentPanel";
@@ -24,6 +30,27 @@ export type PortfolioHoldingsTemplateProps = {
   brokerLinkUrl?: string;
   onRetry?: () => void;
 };
+
+export function PortfolioHoldingsPage() {
+  return (
+    <PortfolioStoreProvider>
+      <PortfolioHoldingsPageContent />
+    </PortfolioStoreProvider>
+  );
+}
+
+function PortfolioHoldingsPageContent() {
+  const portfolio = usePortfolio();
+  const load = usePortfolio((state) => state.load);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  return (
+    <PortfolioHoldingsTemplate onRetry={portfolio.load} state={portfolio} />
+  );
+}
 
 export function PortfolioHoldingsTemplate({
   state,

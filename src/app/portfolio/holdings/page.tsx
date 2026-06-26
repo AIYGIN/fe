@@ -1,4 +1,4 @@
-import { PortfolioHoldingsPage } from "@/components/templates/PortfolioHoldings/page";
+import { PortfolioHoldingsPage } from "@/components/templates/PortfolioHoldings";
 
 export default function Page() {
   return <PortfolioHoldingsPage />;

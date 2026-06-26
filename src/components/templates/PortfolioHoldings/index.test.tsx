@@ -1,8 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
 import { describe, expect, it, vi } from "vitest";
 
+import { apiMockServer } from "@/apis/api.mock-server";
+
 import {
+  PortfolioHoldingsPage,
   PortfolioHoldingsTemplate,
   type PortfolioHoldingsViewState,
 } from "./index";
@@ -162,5 +166,37 @@ describe("PortfolioHoldingsTemplate", () => {
     expect(link).toHaveAttribute("href", "https://www.rakuten-sec.co.jp/");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
+  it("PortfolioHoldingsPageはProvider配下でStoreからloadして表示する", async () => {
+    apiMockServer.use(
+      http.get("*/portfolio/holdings", () =>
+        HttpResponse.json({
+          holdings: [
+            {
+              holdingId: "hold-1",
+              productName: "eMAXIS Slim 全世界株式",
+              ratio: 62.4,
+            },
+          ],
+          lastUpdated: "2026-06-25T09:00:00.000Z",
+        }),
+      ),
+      http.get("*/portfolio/analysis", () =>
+        HttpResponse.json({
+          sectorAllocations: [{ name: "情報技術", ratio: 28.5 }],
+          constituents: [{ name: "Apple", ratio: 7.8 }],
+          countryAllocations: [{ name: "米国", ratio: 71.1 }],
+          lastUpdated: "2026-06-25T09:05:00.000Z",
+        }),
+      ),
+    );
+
+    render(<PortfolioHoldingsPage />);
+
+    expect(
+      await screen.findByText("eMAXIS Slim 全世界株式"),
+    ).toBeInTheDocument();
+    expect(await screen.findByText("Apple")).toBeInTheDocument();
   });
 });
