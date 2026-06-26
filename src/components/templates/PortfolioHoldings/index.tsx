@@ -117,7 +117,7 @@ export function PortfolioHoldingsTemplate({
             <PortfolioAiSummarySection isLoading={isAnalysisLoading} />
           </div>
 
-          <DataNote onRefresh={onRetry} />
+          <DataNote />
         </>
       ) : null}
     </main>
@@ -237,7 +237,7 @@ function BiasCheckSection({ data }: { data: PortfolioData }) {
   );
 }
 
-function DataNote({ onRefresh }: { onRefresh?: () => void }) {
+function DataNote() {
   return (
     <section className={dataNoteClass} style={{ padding: "18px 22px" }}>
       <div className={dataTextClass}>
@@ -251,9 +251,6 @@ function DataNote({ onRefresh }: { onRefresh?: () => void }) {
           </p>
         </div>
       </div>
-      <button className={dataButtonClass} onClick={onRefresh} type="button">
-        ↻ データの更新
-      </button>
     </section>
   );
 }
@@ -470,18 +467,4 @@ const dataTextClass = css({
     lineHeight: 1.65,
     m: "8px 0 0",
   },
-});
-
-const dataButtonClass = css({
-  bg: "white",
-  border: "1px solid",
-  borderColor: "#cbd5e1",
-  borderRadius: "6px",
-  color: "#0f172a",
-  cursor: "pointer",
-  flexShrink: 0,
-  fontSize: "14px",
-  fontWeight: 800,
-  px: "18px",
-  py: "10px",
 });
