@@ -48,6 +48,7 @@ rtk test pnpm test
 エージェント定義:
 
 - `.codex/agents/pm.toml`
+- `.codex/agents/design_reviewer.toml`
 - `.codex/agents/tester.toml`
 - `.codex/agents/implementer.toml`
 - `.codex/agents/reviewer.toml`
