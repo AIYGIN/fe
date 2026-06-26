@@ -14,14 +14,7 @@ export function PortfolioHoldingsSection({
   const total = holdings.reduce((sum, holding) => sum + holding.ratio, 0);
 
   return (
-    <InvestmentPanel
-      action={
-        <button className={editButtonClass} type="button">
-          編集
-        </button>
-      }
-      title="保有商品（手入力）"
-    >
+    <InvestmentPanel title="保有商品（手入力）">
       <div className={tableClass}>
         <div className={headClass}>
           <span>商品・ファンド名</span>
@@ -58,19 +51,6 @@ export function PortfolioHoldingsSection({
 function formatPercent(value: number): string {
   return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
-
-const editButtonClass = css({
-  bg: "#f8fafc",
-  border: "1px solid",
-  borderColor: "#cbd5e1",
-  borderRadius: "6px",
-  color: "#1f2937",
-  cursor: "pointer",
-  fontSize: "13px",
-  fontWeight: 800,
-  px: "14px",
-  py: "9px",
-});
 
 const tableClass = css({
   display: "grid",

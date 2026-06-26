@@ -168,19 +168,6 @@ function BiasCheckSection({ data }: { data: PortfolioData }) {
       tone: (sectorTop?.ratio ?? 0) > 20 ? "amber" : "green",
     },
     {
-      label: `高配当比率（${holdingTop?.productName ?? "保有商品"}系）`,
-      ratio: holdingTop?.ratio ?? 0,
-      target: "目安：20〜30%",
-      result:
-        (holdingTop?.ratio ?? 0) >= 20 && (holdingTop?.ratio ?? 0) <= 30
-          ? "適正範囲内"
-          : "要確認",
-      tone:
-        (holdingTop?.ratio ?? 0) >= 20 && (holdingTop?.ratio ?? 0) <= 30
-          ? "green"
-          : "amber",
-    },
-    {
       label: "新興国比率",
       ratio:
         data.analysis.countryAllocations?.find((item) =>
