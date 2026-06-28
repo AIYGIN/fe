@@ -11,10 +11,6 @@
 - Shell の場合: `codegraph explore "<question or symbols>"` / `codegraph node <symbol-or-file>` を使う。
 <!-- CODEGRAPH_END -->
 
-## Command Usage
-
-シェルコマンドは通常コマンドを直接実行する。コマンド圧縮・wrapper 前提の実行は行わない。
-
 ### Skill / Format Verification Gate
 
 `SKILL.md`、スキル付属テンプレート、PR / Issue / commit message など外部に残る成果物のフォーマット確認では、圧縮・要約された出力を読了扱いにしない。
@@ -54,6 +50,7 @@ pnpm test
 ## Required References
 
 - 開発ワークフロー: `.codex/workflows/sdd_flow.md`
+- Design Review Flow: `.codex/workflows/design_review_flow.md`
 - フロントエンド全体: `src/AGENTS.md`
 - 技術スタック: `docs/rules/tech-stack.md`
 - UI: `docs/rules/ui.md`
@@ -62,6 +59,8 @@ pnpm test
 - 状態管理: `docs/rules/state-management.md`
 
 API を利用する Story、test、実装、レビューでは `docs/rules/state-management.md` を必ず参照し、状態分類と管理スコープを確認する。
+
+参照画像、Figma、ワイヤーフレーム、詳細なUI要件、またはユーザーが「Design Review Flow」「デザインレビュー」「参照画像通り」「同じデザイン」と明示したタスクでは、作業前に `.codex/workflows/design_review_flow.md` を必ず参照する。
 
 ## Branch Rule
 
@@ -118,6 +117,16 @@ pnpm test:e2e
 
 完了条件は `pnpm check`、該当テスト、Storybook / UI 確認、レビューが通っていること。
 
+## Design Review Flow
+
+Design Review Flow は通常の SDD / TDD を置き換えない。参照画像、Figma、ワイヤーフレーム、詳細なUI要件があるタスクでは、`.codex/workflows/design_review_flow.md` を追加ゲートとして扱う。
+
+明示トリガー:
+
+- ユーザーが「Design Review Flow」を実施したいと言った場合。
+- ユーザーが「デザインレビュー」「参照画像通り」「画像と同じデザイン」「Figma通り」など、視覚差分の厳密確認を求めた場合。
+- Issue本文やコメントに参照画像、Figma、ワイヤーフレーム、詳細なUI要件がある場合。
+
 ## Issue Responder
 
 Issue 対応エージェントは人間の明示トリガーがある場合だけ動作する。起動時は Issue 要約、影響範囲、推奨アクションを提示し、続行許可を得てから作業する。
@@ -156,5 +165,4 @@ Issue 対応の実行ログと変更履歴は、人間が追跡できる形で I
 - `previous_status: "running"` を閉じた場合、終了理由は「親が close_agent したため」と明記し、サブエージェント内部エラーと断定しない。
 - mock Issue では `mock_tester -> mock_implementer -> mock_reviewer` の完了状況を明示する。reviewer 未実施なら完了扱いしない。
 - token 使用量が増える追加待機、追加サブエージェント起動、親側引き継ぎは、必要性を説明してから進める。
-
 

@@ -55,6 +55,7 @@ git show --no-color
 
 `assets/template.md` を読み込み、以下ルールで置換する：
 
+- {{issue}} → issue
 - {{summary}} → summary
 - {{background}} → background
 - {{implementation}} → implementation
