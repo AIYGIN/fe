@@ -167,41 +167,45 @@ export function DividendAnalysisTemplate({
             </Panel>
 
             <section className={detailGridClass}>
-              <div className={stickyPanelClass}>
-                <Panel
-                  title={
-                    detail ? (
-                      <>
-                        詳細分析：
-                        <span className={detailTitleNameClass}>
-                          {detail.companyName}（{detail.symbolId}）
-                        </span>
-                        <span className={srOnlyClass}>
-                          {detail.companyName}
-                        </span>
-                      </>
+              {selectedSymbolId ? (
+                <div className={stickyPanelClass}>
+                  <Panel
+                    title={
+                      detail ? (
+                        <>
+                          詳細分析：
+                          <span className={detailTitleNameClass}>
+                            {detail.companyName}（{detail.symbolId}）
+                          </span>
+                          <span className={srOnlyClass}>
+                            {detail.companyName}
+                          </span>
+                        </>
+                      ) : (
+                        "詳細分析"
+                      )
+                    }
+                    titleAriaLabel={detail?.companyName}
+                  >
+                    {detailStatus === "error" ? (
+                      <div className={alertClass} role="alert">
+                        <p>
+                          {error ?? "高配当分析データを取得できませんでした"}
+                        </p>
+                        <InvestmentButton onClick={onRetry} variant="secondary">
+                          再試行
+                        </InvestmentButton>
+                      </div>
                     ) : (
-                      "詳細分析"
-                    )
-                  }
-                  titleAriaLabel={detail?.companyName}
-                >
-                  {detailStatus === "error" ? (
-                    <div className={alertClass} role="alert">
-                      <p>{error ?? "高配当分析データを取得できませんでした"}</p>
-                      <InvestmentButton onClick={onRetry} variant="secondary">
-                        再試行
-                      </InvestmentButton>
-                    </div>
-                  ) : (
-                    <DividendAnalysisDetail
-                      detail={detail}
-                      showHeading={false}
-                      loading={detailStatus === "loading"}
-                    />
-                  )}
-                </Panel>
-              </div>
+                      <DividendAnalysisDetail
+                        detail={detail}
+                        showHeading={false}
+                        loading={detailStatus === "loading"}
+                      />
+                    )}
+                  </Panel>
+                </div>
+              ) : null}
               <AiSummaryPanel
                 detail={detail}
                 loading={detailStatus === "loading"}
@@ -455,13 +459,23 @@ const detailGridClass = css({
   alignItems: "start",
   display: "grid",
   gap: "4",
-  gridTemplateColumns: { base: "1fr", xl: "minmax(0, 1fr) minmax(0, 1fr)" },
+  gridTemplateColumns: { base: "1fr", xl: "minmax(0, 1fr)" },
+  // fixed footer に隠れないように下余白を確保
+  pb: { base: "360px", md: "320px" },
 });
 
 const stickyPanelClass = css({
-  minW: 0,
-  position: { xl: "sticky" },
-  top: { xl: "4" },
+  bg: "white",
+  borderTop: "1px solid token(colors.investment-border-soft)",
+  bottom: 0,
+  boxShadow: "0 -12px 32px rgba(15, 23, 42, 0.14)",
+  left: 0,
+  height: "33.333vh",
+  overflowY: "auto",
+  position: "fixed",
+  right: 0,
+  zIndex: 20,
+  p: { base: "3", md: "4" },
 });
 
 const aiPanelClass = cx(
@@ -472,8 +486,6 @@ const aiPanelClass = cx(
     borderColor: "#bcd4ff",
     display: "grid",
     gap: "4",
-    position: { xl: "sticky" },
-    top: { xl: "4" },
   }),
 );
 
