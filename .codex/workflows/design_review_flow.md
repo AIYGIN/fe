@@ -50,6 +50,32 @@ Design Review はデザインのみを扱う。次の領域はレビューしな
 - Design consistency: 既存UI、Panda CSS、コンポーネント設計規約との整合
 - Accessibility: ラベル、コントラスト、フォーカス、キーボード操作などUI上の観点
 
+## 参照画像比較ルール
+
+参照画像、Figma、ワイヤーフレームがある場合、Design Review は「主要構成が同じ」だけでは pass にしない。
+必ず実装画面の screenshot を取得し、参照画像と横並びで比較する。
+
+最低限比較する項目:
+
+- viewport / canvas size: 参照画像と同等の表示幅で確認しているか。
+- global layout: 外側余白、ヘッダー位置、上段 / 下段 / 右カラムの比率、下部注記の位置が近いか。
+- panel shape: 枠線、角丸、背景色、影、カード内余白が近いか。
+- table density: 行高、列幅、セル padding、罫線、選択行ハイライト、数値の揃えが近いか。
+- typography: 見出し、本文、数値、バッジのサイズ / weight / line-height が近いか。
+- color / status: safe / warning / danger / neutral の色、バー、バッジ、注記色が近いか。
+- visual assets: ロゴ、アイコン、チャート、ミニグラフが参照画像の役割と視認性に近いか。
+- state fidelity: selected / loading / empty / error / retry / AI summary null などの表示が要件と矛盾しないか。
+- responsive: mobile / tablet / desktop で重なり、はみ出し、操作不能がないか。
+
+pass できない例:
+
+- 参照画像と同じ情報が表示されているだけで、余白・密度・比率が明確に違う。
+- AI summary TODO など未提供状態なのに、分析済みの要約に見える文言を出している。
+- table をカード一覧や簡略レイアウトに置き換えている。
+- 実装 screenshot を確認せず、コード上の推測だけで pass している。
+
+レビュー結果には、実際に比較した参照画像と実装 screenshot のパスを `context_used` に必ず含める。
+
 ## Handoff
 
 Design Reviewer は、次のいずれかで引き継ぐ。
