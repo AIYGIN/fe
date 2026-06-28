@@ -4,7 +4,6 @@ import type { DividendAnalysisDetail as DividendAnalysisDetailData } from "@/hoo
 import { css, cx } from "../../../../../styled-system/css";
 import { DividendMetricDetailTable } from "../DividendMetricDetailTable";
 import { InvestmentDonutChart } from "../InvestmentDonutChart";
-import styles from "./styles.module.css";
 
 type DividendAnalysisDetailProps = {
   detail: DividendAnalysisDetailData | null;
@@ -43,7 +42,7 @@ export function DividendAnalysisDetail({
           </p>
         </div>
       ) : null}
-      <div className={styles.detailBody}>
+      <div className={detailBodyClass}>
         <ScoreSummaryCard detail={detail} />
         <DividendMetricDetailTable
           metrics={detail.metrics}
@@ -60,7 +59,7 @@ function ScoreSummaryCard({ detail }: { detail: DividendAnalysisDetailData }) {
   return (
     <section className={scoreCardClass} aria-label="配当安全性スコア">
       <h3 className={sectionTitleClass}>配当安全性スコア</h3>
-      <p className={styles.scoreValueRow}>
+      <p className={scoreValueRowClass}>
         <span className={cx(scoreValueClass, toneTextClass[tone])}>
           {Math.round(detail.totalScore)}
         </span>
@@ -75,20 +74,21 @@ function ScoreSummaryCard({ detail }: { detail: DividendAnalysisDetailData }) {
         </span>
       </p>
       <StatusBadge tone={tone}>{detail.judgement}</StatusBadge>
-      <div className={styles.breakdown}>
+      <div className={breakdownClass}>
         <h4 className={sectionTitleClass}>スコア内訳</h4>
-        <div className={styles.breakdownBody}>
-          <div className={styles.chartScale}>
+        <div className={breakdownBodyClass}>
+          <div className={chartWrapClass}>
             <InvestmentDonutChart
               items={toDonutItems(detail)}
               label="スコア内訳"
+              size="sm"
             />
           </div>
-          <dl className={styles.legend}>
+          <dl className={legendClass}>
             {toDonutItems(detail).map((item) => (
-              <div className={styles.legendRow} key={item.name}>
+              <div className={legendRowClass} key={item.name}>
                 <span
-                  className={styles.legendSwatch}
+                  className={legendSwatchClass}
                   style={{ backgroundColor: item.color }}
                 />
                 <dt className={legendLabelClass}>{item.name}</dt>
@@ -104,7 +104,60 @@ function ScoreSummaryCard({ detail }: { detail: DividendAnalysisDetailData }) {
   );
 }
 
-const scoreCardClass = styles.scoreCard;
+const detailBodyClass = css({
+  display: "grid",
+  gap: "4",
+  gridTemplateColumns: { base: "1fr", lg: "minmax(0, 1fr) minmax(0, 1fr)" },
+});
+
+const scoreCardClass = css({
+  bg: "white",
+  border: "1px solid token(colors.investment-border-soft)",
+  borderRadius: "8px",
+  minW: 0,
+  p: "4",
+});
+
+const scoreValueRowClass = css({
+  mt: "3",
+});
+
+const breakdownClass = css({
+  mt: "4",
+});
+
+const breakdownBodyClass = css({
+  alignItems: "center",
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "3",
+  mt: "3",
+});
+
+const chartWrapClass = css({
+  flex: "0 0 auto",
+  w: "36",
+});
+
+const legendClass = css({
+  flex: "1 1 auto",
+  display: "grid",
+  gap: "2",
+  minW: "36",
+});
+
+const legendRowClass = css({
+  alignItems: "center",
+  display: "grid",
+  gap: "2",
+  gridTemplateColumns: "3 1fr auto",
+});
+
+const legendSwatchClass = css({
+  borderRadius: "999px",
+  h: "3",
+  w: "3",
+});
 
 const companyHeadingClass = css({
   color: "investment-text",

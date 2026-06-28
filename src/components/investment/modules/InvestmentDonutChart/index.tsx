@@ -1,4 +1,4 @@
-import { css } from "../../../../../styled-system/css";
+import { css, cx } from "../../../../../styled-system/css";
 
 export type InvestmentDonutItem = {
   name: string;
@@ -9,18 +9,20 @@ export type InvestmentDonutItem = {
 type InvestmentDonutChartProps = {
   items: InvestmentDonutItem[];
   label?: string;
+  size?: "sm" | "md";
 };
 
 export function InvestmentDonutChart({
   items,
   label = "合計 100%",
+  size = "md",
 }: InvestmentDonutChartProps) {
   const background = buildConicGradient(items);
 
   return (
     <div
       aria-label={label}
-      className={chartClass}
+      className={cx(chartClass, size === "sm" ? smallChartClass : undefined)}
       role="img"
       style={{ background }}
     >
@@ -56,6 +58,10 @@ const chartClass = css({
   placeItems: "center",
   position: "relative",
   w: { base: "148px", md: "176px" },
+});
+
+const smallChartClass = css({
+  w: { base: "32", md: "36" },
 });
 
 const centerClass = css({

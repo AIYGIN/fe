@@ -17,7 +17,6 @@ import { DividendAnalysisDetail } from "../../investment/modules/DividendAnalysi
 import { DividendAnalysisRuleDialog } from "../../investment/modules/DividendAnalysisRuleDialog";
 import { DividendAnalysisTable } from "../../investment/modules/DividendAnalysisTable";
 import { DividendDisclaimer } from "../../investment/modules/DividendDisclaimer";
-import styles from "./styles.module.css";
 
 type DividendAnalysisPageProps = {
   autoLoad?: boolean;
@@ -151,7 +150,7 @@ export function DividendAnalysisTemplate({
               title="銘柄一覧（スコア順）"
             >
               {overview ? (
-                <div className={styles.srOnly}>
+                <div className={srOnlyClass}>
                   <span>{enterprises.length}銘柄</span>
                   <span>データ更新: {formatDateTime(overview.updatedAt)}</span>
                 </div>
@@ -168,39 +167,41 @@ export function DividendAnalysisTemplate({
             </Panel>
 
             <section className={detailGridClass}>
-              <Panel
-                title={
-                  detail ? (
-                    <>
-                      詳細分析：
-                      <span className={detailTitleNameClass}>
-                        {detail.companyName}（{detail.symbolId}）
-                      </span>
-                      <span className={styles.srOnly}>
-                        {detail.companyName}
-                      </span>
-                    </>
+              <div className={stickyPanelClass}>
+                <Panel
+                  title={
+                    detail ? (
+                      <>
+                        詳細分析：
+                        <span className={detailTitleNameClass}>
+                          {detail.companyName}（{detail.symbolId}）
+                        </span>
+                        <span className={srOnlyClass}>
+                          {detail.companyName}
+                        </span>
+                      </>
+                    ) : (
+                      "詳細分析"
+                    )
+                  }
+                  titleAriaLabel={detail?.companyName}
+                >
+                  {detailStatus === "error" ? (
+                    <div className={alertClass} role="alert">
+                      <p>{error ?? "高配当分析データを取得できませんでした"}</p>
+                      <InvestmentButton onClick={onRetry} variant="secondary">
+                        再試行
+                      </InvestmentButton>
+                    </div>
                   ) : (
-                    "詳細分析"
-                  )
-                }
-                titleAriaLabel={detail?.companyName}
-              >
-                {detailStatus === "error" ? (
-                  <div className={alertClass} role="alert">
-                    <p>{error ?? "高配当分析データを取得できませんでした"}</p>
-                    <InvestmentButton onClick={onRetry} variant="secondary">
-                      再試行
-                    </InvestmentButton>
-                  </div>
-                ) : (
-                  <DividendAnalysisDetail
-                    detail={detail}
-                    showHeading={false}
-                    loading={detailStatus === "loading"}
-                  />
-                )}
-              </Panel>
+                    <DividendAnalysisDetail
+                      detail={detail}
+                      showHeading={false}
+                      loading={detailStatus === "loading"}
+                    />
+                  )}
+                </Panel>
+              </div>
               <AiSummaryPanel
                 detail={detail}
                 loading={detailStatus === "loading"}
@@ -332,9 +333,19 @@ function AiSummaryPanel({
   );
 }
 
-const pageClass = styles.page;
+const pageClass = css({
+  bg: "#fcfdff",
+  color: "investment-text",
+  minH: "100vh",
+});
 
-const mainClass = styles.main;
+const mainClass = css({
+  display: "grid",
+  gap: "4",
+  mx: "auto",
+  p: { base: "4", md: "6", xl: "8" },
+  w: "full",
+});
 
 const headerClass = css({
   alignItems: { base: "stretch", md: "start" },
@@ -404,19 +415,78 @@ const infoIconClass = css({
   w: "4",
 });
 
-const panelClass = styles.panel;
+const panelClass = css({
+  bg: "white",
+  border: "1px solid #d8e2f2",
+  borderRadius: "8px",
+  boxShadow: "0 10px 24px rgba(15, 23, 42, 0.03)",
+  minW: 0,
+  p: { base: "3", md: "4" },
+});
 
-const panelHeaderClass = styles.panelHeader;
+const panelHeaderClass = css({
+  alignItems: "center",
+  display: "flex",
+  justifyContent: "space-between",
+  mb: "3",
+});
 
-const panelTitleClass = styles.panelTitle;
+const panelTitleClass = css({
+  color: "investment-text",
+  fontSize: "lg",
+  fontWeight: "900",
+  letterSpacing: "0",
+  lineHeight: "1.35",
+  m: 0,
+});
 
-const detailTitleNameClass = styles.detailTitleName;
+const detailTitleNameClass = css({
+  color: "investment-blue",
+});
 
-const panelDescriptionClass = styles.panelDescription;
+const panelDescriptionClass = css({
+  color: "investment-muted",
+  fontSize: "xs",
+  fontWeight: "800",
+  mt: "3",
+});
 
-const detailGridClass = styles.detailGrid;
+const detailGridClass = css({
+  alignItems: "start",
+  display: "grid",
+  gap: "4",
+  gridTemplateColumns: { base: "1fr", xl: "minmax(0, 1fr) minmax(0, 1fr)" },
+});
 
-const aiPanelClass = cx(panelClass, styles.aiPanel);
+const stickyPanelClass = css({
+  minW: 0,
+  position: { xl: "sticky" },
+  top: { xl: "4" },
+});
+
+const aiPanelClass = cx(
+  panelClass,
+  css({
+    alignContent: "start",
+    bg: "#f7fbff",
+    borderColor: "#bcd4ff",
+    display: "grid",
+    gap: "4",
+    position: { xl: "sticky" },
+    top: { xl: "4" },
+  }),
+);
+
+const srOnlyClass = css({
+  border: 0,
+  clip: "rect(0, 0, 0, 0)",
+  h: "1px",
+  overflow: "hidden",
+  p: 0,
+  position: "absolute",
+  whiteSpace: "nowrap",
+  w: "1px",
+});
 
 const aiTitleClass = css({
   alignItems: "center",
