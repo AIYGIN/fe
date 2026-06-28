@@ -1,5 +1,3 @@
-import { WarningCard } from "@/components/investment";
-
 import { css } from "../../../../../styled-system/css";
 
 type DividendDisclaimerProps = {
@@ -15,46 +13,84 @@ export function DividendDisclaimer({
   isRealtime,
   updatedAt,
 }: DividendDisclaimerProps) {
-  const note = "画面上部のデータ更新日時とデータ基準日を確認してください。";
-
   return (
     <aside
       aria-label={`データ注記 ${formatDateTime(updatedAt)} ${dataAsOfDate}`}
-      className={css({
-        border: "1px solid",
-        borderColor: "investment-border",
-        borderRadius: "8px",
-        bg: "#f8fafc",
-        color: "investment-muted",
-        p: "4",
-      })}
+      className={disclaimerClass}
     >
-      {isRealtime === false ? (
-        <p className={css({ fontSize: "sm", fontWeight: "800", mb: "3" })}>
-          リアルタイムデータではありません
-        </p>
-      ) : null}
-      <WarningCard title="データについて">{note}</WarningCard>
+      <p className={mainNoteClass}>
+        <span className={infoIconClass} aria-hidden="true">
+          i
+        </span>
+        本画面は高配当株の安全性を分析するものであり、特定の銘柄の売買を推奨するものではありません。
+      </p>
+      <div className={metaClass}>
+        <span>データ基準日: {dataAsOfDate}</span>
+        <span>更新日時: {formatDateTime(updatedAt)}</span>
+        {isRealtime === false ? (
+          <span>リアルタイムデータではありません</span>
+        ) : null}
+      </div>
       {disclaimers.length > 0 ? (
-        <ul
-          className={css({
-            display: "grid",
-            gap: "1",
-            listStyle: "disc",
-            mt: "3",
-            pl: "5",
-          })}
-        >
+        <ul className={listClass}>
           {disclaimers.map((disclaimer) => (
-            <li className={css({ fontSize: "sm" })} key={disclaimer}>
-              {disclaimer}
-            </li>
+            <li key={disclaimer}>{disclaimer}</li>
           ))}
         </ul>
       ) : null}
     </aside>
   );
 }
+
+const disclaimerClass = css({
+  bg: "#f3f8ff",
+  border: "1px solid token(colors.investment-border-soft)",
+  borderRadius: "8px",
+  color: "investment-muted",
+  display: "grid",
+  gap: "2",
+  p: "3",
+});
+
+const mainNoteClass = css({
+  alignItems: "center",
+  color: "investment-blue",
+  display: "flex",
+  fontSize: "sm",
+  fontWeight: "900",
+  gap: "2",
+});
+
+const infoIconClass = css({
+  alignItems: "center",
+  border: "2px solid currentColor",
+  borderRadius: "999px",
+  display: "inline-flex",
+  flexShrink: 0,
+  fontSize: "2xs",
+  fontWeight: "900",
+  h: "4",
+  justifyContent: "center",
+  lineHeight: 1,
+  w: "4",
+});
+
+const metaClass = css({
+  display: "flex",
+  flexWrap: "wrap",
+  fontSize: "xs",
+  fontWeight: "800",
+  gap: "3",
+});
+
+const listClass = css({
+  display: "grid",
+  fontSize: "xs",
+  fontWeight: "700",
+  gap: "1",
+  listStyle: "disc",
+  pl: "5",
+});
 
 function formatDateTime(value: string) {
   return value.slice(0, 16).replace("T", " ");
