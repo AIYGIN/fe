@@ -27,7 +27,7 @@ export function DividendAnalysisRuleDialog({
         inset: 0,
         placeItems: "center",
         position: "fixed",
-        p: { base: "4", md: "6" },
+        p: "4",
         zIndex: 10,
       })}
       role="dialog"
@@ -36,11 +36,9 @@ export function DividendAnalysisRuleDialog({
         className={css({
           bg: "white",
           borderRadius: "8px",
-          display: "grid",
-          gap: "4",
           boxShadow: "0 20px 50px rgba(15, 23, 42, 0.18)",
           maxW: "lg",
-          p: { base: "4", md: "6" },
+          p: "6",
           w: "full",
         })}
       >
@@ -55,7 +53,7 @@ export function DividendAnalysisRuleDialog({
             color: "investment-muted",
             fontSize: "sm",
             lineHeight: "1.7",
-            m: 0,
+            mt: "4",
           })}
         >
           配当利回り、減配履歴、配当成長、配当性向、FCF、財務指標を参考スコアとして表示します。
@@ -65,6 +63,7 @@ export function DividendAnalysisRuleDialog({
           className={css({
             display: "flex",
             justifyContent: "flex-end",
+            mt: "6",
           })}
         >
           <InvestmentButton onClick={() => onOpenChange(false)}>
