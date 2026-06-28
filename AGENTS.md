@@ -11,29 +11,26 @@
 - Shell の場合: `codegraph explore "<question or symbols>"` / `codegraph node <symbol-or-file>` を使う。
 <!-- CODEGRAPH_END -->
 
-## Command Efficiency
+## Command Usage
 
-シェルコマンドは原則 `rtk` を prefix して実行する。`rtk` が環境にない、またはデバッグで生出力が必要な場合のみ通常コマンドへ戻す。
-
-コマンドチェーンでは各 segment に `rtk` を付ける。生出力を維持しつつ計測したい場合は `rtk proxy <cmd>` を使う。
+シェルコマンドは通常コマンドを直接実行する。コマンド圧縮・wrapper 前提の実行は行わない。
 
 ### Skill / Format Verification Gate
 
-`SKILL.md`、スキル付属テンプレート、PR / Issue / commit message など外部に残る成果物のフォーマット確認では、`rtk` による圧縮出力を読了扱いにしない。
+`SKILL.md`、スキル付属テンプレート、PR / Issue / commit message など外部に残る成果物のフォーマット確認では、圧縮・要約された出力を読了扱いにしない。
 
-- スキル本文・テンプレート確認では `rtk read` / `rtk cat` / `rtk grep` を使わず、通常の `sed -n`、`cat`、`grep`、`nl -ba` で必要範囲を確認する。
+- スキル本文・テンプレート確認では通常の `sed -n`、`cat`、`grep`、`nl -ba` などで必要範囲を確認する。
 - 出力が `[... compressed ...]`、`<<ccr:...>>`、要約表示になった場合は、その時点で確認失敗として作業を止める。汎用フォーマットで代用しない。
 - `auto-pr`、`plan-to-issue`、提案書などフォーマット指定のあるスキルでは、作成前に必須見出し・順序・チェック項目を確認し、その形式であることを確認してから `gh pr create` / `gh pr edit` / `gh issue create` を実行する。
 - 作成後は `gh pr view` / `gh issue view` で実際の本文を取得し、スキル指定フォーマットとの差異があれば即修正する。
-- このゲートは Command Efficiency より優先する。rtk が原因で全文確認できない場合は rtk を外す。
 
 例:
 
 ```bash
-rtk git status
-rtk git diff
-rtk pnpm check
-rtk test pnpm test
+git status
+git diff
+pnpm check
+pnpm test
 ```
 
 ## Core Principles
@@ -161,45 +158,3 @@ Issue 対応の実行ログと変更履歴は、人間が追跡できる形で I
 - token 使用量が増える追加待機、追加サブエージェント起動、親側引き継ぎは、必要性を説明してから進める。
 
 
-<!-- headroom:rtk-instructions -->
-# RTK (Rust Token Killer) - Token-Optimized Commands
-
-When running shell commands, **always prefix with `rtk`**. This reduces context
-usage by 60-90% with zero behavior change. If rtk has no filter for a command,
-it passes through unchanged — so it is always safe to use.
-
-## Key Commands
-```bash
-# Git (59-80% savings)
-rtk git status          rtk git diff            rtk git log
-
-# Files & Search (60-75% savings)
-rtk ls <path>           rtk read <file>         rtk grep <pattern>
-rtk find <pattern>      rtk diff <file>
-
-# Test (90-99% savings) — shows failures only
-rtk pytest tests/       rtk cargo test          rtk test <cmd>
-
-# Build & Lint (80-90% savings) — shows errors only
-rtk tsc                 rtk lint                rtk cargo build
-rtk prettier --check    rtk mypy                rtk ruff check
-
-# Analysis (70-90% savings)
-rtk err <cmd>           rtk log <file>          rtk json <file>
-rtk summary <cmd>       rtk deps                rtk env
-
-# GitHub (26-87% savings)
-rtk gh pr view <n>      rtk gh run list         rtk gh issue list
-
-# Infrastructure (85% savings)
-rtk docker ps           rtk kubectl get         rtk docker logs <c>
-
-# Package managers (70-90% savings)
-rtk pip list            rtk pnpm install        rtk npm run <script>
-```
-
-## Rules
-- In command chains, prefix each segment: `rtk git add . && rtk git commit -m "msg"`
-- For debugging, use raw command without rtk prefix
-- `rtk proxy <cmd>` runs command without filtering but tracks usage
-<!-- /headroom:rtk-instructions -->

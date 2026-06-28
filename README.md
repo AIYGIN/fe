@@ -54,7 +54,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ## AIツールの勧め
 
 - [Codex](https://openai.com/ja-JP/codex/)
-- [headroom](https://github.com/chopratejas/headroom)
 - [codegraph](https://github.com/colbymchenry/codegraph)
 - [Hermes Agent](https://hermes-agent.org/ja/)
 - [agentmemory](https://github.com/rohitg00/agentmemory)
