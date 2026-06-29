@@ -159,7 +159,7 @@ const useDividendSuccessHandlers = () => {
 };
 
 describe("DividendAnalysisPage", () => {
-  it("API成功時に一覧、初期詳細、データ鮮度、非リアルタイム、免責注記を表示する", async () => {
+  it("API成功時に一覧、データ鮮度、非リアルタイム、免責注記を表示する", async () => {
     useDividendSuccessHandlers();
 
     render(<DividendAnalysisPage />);
@@ -167,7 +167,7 @@ describe("DividendAnalysisPage", () => {
     expect(
       await screen.findByRole("heading", { name: "高配当分析" }),
     ).toBeInTheDocument();
-    expect(await screen.findAllByText("日本たばこ産業")).toHaveLength(2);
+    expect(await screen.findAllByText("日本たばこ産業")).toHaveLength(1);
     expect(
       screen.getByText("三井住友フィナンシャルグループ"),
     ).toBeInTheDocument();
@@ -180,7 +180,6 @@ describe("DividendAnalysisPage", () => {
       screen.getByText("リアルタイムデータではありません"),
     ).toBeInTheDocument();
     expect(screen.getByText("表示内容は参考情報です。")).toBeInTheDocument();
-    expect(screen.getByText("AI要約は準備中です")).toBeInTheDocument();
   });
 
   it("API失敗時に復旧可能なエラー状態を表示する", async () => {
@@ -195,26 +194,6 @@ describe("DividendAnalysisPage", () => {
 
     render(<DividendAnalysisPage />);
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "高配当分析データを取得できませんでした",
-    );
-    expect(screen.getByRole("button", { name: "再試行" })).toBeEnabled();
-  });
-
-  it("詳細API失敗時に詳細パネルでエラーを表示し再試行できる", async () => {
-    apiMockServer.use(
-      getEnterprisesControllerGetQuantsInfoMockHandler(quantsInfoResponse),
-      http.get("*/enterprises/:symbolId/dividendAnalysis", () =>
-        HttpResponse.json(
-          { message: "詳細データを取得できませんでした" },
-          { status: 500 },
-        ),
-      ),
-    );
-
-    render(<DividendAnalysisPage />);
-
-    expect(await screen.findByText("日本たばこ産業")).toBeInTheDocument();
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "高配当分析データを取得できませんでした",
     );
@@ -244,7 +223,7 @@ describe("DividendAnalysisPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("Templateはpropsで渡された状態を表示し選択と再試行を委譲する", async () => {
+  it("Templateはpropsで渡された状態を表示し選択を委譲する", async () => {
     const user = userEvent.setup();
     const onSelectSymbol = vi.fn();
     const onRetry = vi.fn();
@@ -268,9 +247,37 @@ describe("DividendAnalysisPage", () => {
         name: "8316 三井住友フィナンシャルグループ 詳細を表示",
       }),
     );
-    await user.click(screen.getByRole("button", { name: "再試行" }));
 
     expect(onSelectSymbol).toHaveBeenCalledWith("8316");
+  });
+
+  it("Templateはsticky詳細表示中に再試行を委譲する", async () => {
+    const user = userEvent.setup();
+    const onSelectSymbol = vi.fn();
+    const onRetry = vi.fn();
+
+    render(
+      <DividendAnalysisTemplate
+        detail={null}
+        detailStatus="error"
+        enterprises={enterprises}
+        error="詳細データを取得できませんでした"
+        onRetry={onRetry}
+        onSelectSymbol={onSelectSymbol}
+        overview={quantsInfoResponse}
+        selectedSymbolId="2914"
+        status="success"
+      />,
+    );
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "2914 日本たばこ産業 詳細を表示",
+      }),
+    );
+
+    await user.click(screen.getByRole("button", { name: "再試行" }));
+
     expect(onRetry).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("alert")).toHaveTextContent(
       "詳細データを取得できませんでした",

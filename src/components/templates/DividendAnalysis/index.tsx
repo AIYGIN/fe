@@ -94,13 +94,36 @@ export function DividendAnalysisTemplate({
   status,
 }: DividendAnalysisTemplateProps) {
   const [ruleOpen, setRuleOpen] = useState(false);
+  const [stickySymbolId, setStickySymbolId] = useState<string | null>(null);
   const isLoading = status === "loading";
   const isError = status === "error";
   const isEmpty = status === "empty";
 
+  const isDetailSticky =
+    selectedSymbolId !== null && selectedSymbolId === stickySymbolId;
+
+  const handleSelectSymbol = (symbolId: string) => {
+    setStickySymbolId((current) => {
+      if (current === symbolId) {
+        return null;
+      }
+
+      return symbolId;
+    });
+
+    if (selectedSymbolId !== symbolId) {
+      onSelectSymbol(symbolId);
+    }
+  };
+
   return (
     <div className={pageClass}>
-      <main className={mainClass}>
+      <main
+        className={cx(
+          mainClass,
+          isDetailSticky ? stickyContentPaddingClass : undefined,
+        )}
+      >
         <header className={headerClass}>
           <div>
             <h1 className={titleClass}>高配当分析</h1>
@@ -160,57 +183,62 @@ export function DividendAnalysisTemplate({
               ) : (
                 <DividendAnalysisTable
                   enterprises={enterprises}
-                  onSelectSymbol={onSelectSymbol}
+                  onSelectSymbol={handleSelectSymbol}
                   selectedSymbolId={selectedSymbolId}
                 />
               )}
             </Panel>
 
-            <section className={detailGridClass}>
-              {selectedSymbolId ? (
-                <div className={stickyPanelClass}>
-                  <Panel
-                    title={
-                      detail ? (
-                        <>
-                          詳細分析：
-                          <span className={detailTitleNameClass}>
-                            {detail.companyName}（{detail.symbolId}）
-                          </span>
-                          <span className={srOnlyClass}>
-                            {detail.companyName}
-                          </span>
-                        </>
+            {isDetailSticky ? (
+              <section className={stickyDetailGridClass}>
+                {selectedSymbolId ? (
+                  <div className={detailPanelClass}>
+                    <Panel
+                      title={
+                        detail ? (
+                          <>
+                            詳細分析：
+                            <span className={detailTitleNameClass}>
+                              {detail.companyName}（{detail.symbolId}）
+                            </span>
+                            <span className={srOnlyClass}>
+                              {detail.companyName}
+                            </span>
+                          </>
+                        ) : (
+                          "詳細分析"
+                        )
+                      }
+                      titleAriaLabel={detail?.companyName}
+                    >
+                      {detailStatus === "error" ? (
+                        <div className={alertClass} role="alert">
+                          <p>
+                            {error ?? "高配当分析データを取得できませんでした"}
+                          </p>
+                          <InvestmentButton
+                            onClick={onRetry}
+                            variant="secondary"
+                          >
+                            再試行
+                          </InvestmentButton>
+                        </div>
                       ) : (
-                        "詳細分析"
-                      )
-                    }
-                    titleAriaLabel={detail?.companyName}
-                  >
-                    {detailStatus === "error" ? (
-                      <div className={alertClass} role="alert">
-                        <p>
-                          {error ?? "高配当分析データを取得できませんでした"}
-                        </p>
-                        <InvestmentButton onClick={onRetry} variant="secondary">
-                          再試行
-                        </InvestmentButton>
-                      </div>
-                    ) : (
-                      <DividendAnalysisDetail
-                        detail={detail}
-                        showHeading={false}
-                        loading={detailStatus === "loading"}
-                      />
-                    )}
-                  </Panel>
-                </div>
-              ) : null}
-              <AiSummaryPanel
-                detail={detail}
-                loading={detailStatus === "loading"}
-              />
-            </section>
+                        <DividendAnalysisDetail
+                          detail={detail}
+                          showHeading={false}
+                          loading={detailStatus === "loading"}
+                        />
+                      )}
+                    </Panel>
+                  </div>
+                ) : null}
+                <AiSummaryPanel
+                  detail={detail}
+                  loading={detailStatus === "loading"}
+                />
+              </section>
+            ) : null}
 
             {overview ? (
               <DividendDisclaimer
@@ -455,27 +483,33 @@ const panelDescriptionClass = css({
   mt: "3",
 });
 
-const detailGridClass = css({
-  alignItems: "start",
-  display: "grid",
-  gap: "4",
-  gridTemplateColumns: { base: "1fr", xl: "minmax(0, 1fr)" },
-  // fixed footer に隠れないように下余白を確保
-  pb: { base: "360px", md: "320px" },
+const detailPanelClass = css({
+  minW: 0,
 });
 
-const stickyPanelClass = css({
+const stickyDetailGridClass = css({
+  alignItems: "start",
   bg: "white",
   borderTop: "1px solid token(colors.investment-border-soft)",
   bottom: 0,
   boxShadow: "0 -12px 32px rgba(15, 23, 42, 0.14)",
+  height: "33.333dvh",
   left: 0,
-  height: "33.333vh",
+  display: "grid",
+  gap: "4",
+  gridTemplateColumns: {
+    base: "1fr",
+    xl: "minmax(0, 1fr) minmax(0, 1fr)",
+  },
   overflowY: "auto",
+  p: { base: "3", md: "4" },
   position: "fixed",
   right: 0,
   zIndex: 20,
-  p: { base: "3", md: "4" },
+});
+
+const stickyContentPaddingClass = css({
+  pb: "calc(33.333dvh  24px)",
 });
 
 const aiPanelClass = cx(
