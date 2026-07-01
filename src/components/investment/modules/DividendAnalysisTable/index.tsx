@@ -117,12 +117,12 @@ export function DividendAnalysisTable({
                   score={enterprise.scoreBreakdown.dividendGrowth.score}
                 />
                 <ScoreCell
-                  maxScore={enterprise.scoreBreakdown.dividendYield.maxScore}
-                  score={enterprise.scoreBreakdown.dividendYield.score}
-                />
-                <ScoreCell
                   maxScore={enterprise.scoreBreakdown.payoutRatio.maxScore}
                   score={enterprise.scoreBreakdown.payoutRatio.score}
+                />
+                <ScoreCell
+                  maxScore={enterprise.scoreBreakdown.dividendYield.maxScore}
+                  score={enterprise.scoreBreakdown.dividendYield.score}
                 />
                 <ScoreCell
                   maxScore={enterprise.scoreBreakdown.financialMetrics.maxScore}
