@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it, vi } from "vitest";
@@ -8,6 +8,7 @@ import {
   getEnterprisesControllerGetDividendAnalysisMockHandler,
   getEnterprisesControllerGetQuantsInfoMockHandler,
 } from "@/apis/generated/dividend-analysis/dividend-analysis.msw";
+import { getEnterprisesControllerGetQuantsInfoMockHandler as getEnterprisesControllerGetOverviewMockHandler } from "@/apis/generated/enterprises/enterprises.msw";
 import type {
   EnterpriseQuantInfoDto,
   GetEnterpriseDividendAnalysisResponseDto,
@@ -33,8 +34,8 @@ const createScoreBreakdown = (
   },
   dividendCutHistory: { score: 18, maxScore: 20, periodYears: 10 },
   dividendGrowth: { score: 16, maxScore: 20, periodYears: 10 },
-  payoutRatio: { score: 14, maxScore: 20 },
-  dividendYield: { score: 15, maxScore: 20 },
+  payoutRatio: { score: 4, maxScore: 15 },
+  dividendYield: { score: 9, maxScore: 10 },
   financialMetrics: { score: 13, maxScore: 20 },
 });
 
@@ -79,6 +80,35 @@ const quantsInfoResponse: GetEnterpriseQuantsInfoResponseDto = {
   disclaimers,
 };
 
+const createOverviewItem = (
+  index: number,
+  dividendScore: number,
+): EnterpriseQuantInfoDto => ({
+  rank: index,
+  symbolId: `R2${String(index).padStart(3, "0")}`,
+  companyName: `R2高配当候補${String(index).padStart(2, "0")}`,
+  dividendScore,
+  dividendYield: 2 + index / 100,
+  payoutRatio: 30 + index / 10,
+  per: 10 + index / 10,
+  pbr: 1 + index / 100,
+  roe: 8 + index / 10,
+  equityRatio: 40 + index / 10,
+  freeCashFlowStatus: "AVAILABLE",
+  missingFields: [],
+  warnings: [],
+});
+
+const createOverviewResponse = (
+  items: EnterpriseQuantInfoDto[],
+): GetEnterpriseQuantsInfoResponseDto => ({
+  scoreVersion: "dividend-bff-r2",
+  asOf: "2026-06-30",
+  sort: "dividendScore",
+  order: "desc",
+  items,
+});
+
 const createDetail = (
   enterprise: EnterpriseQuantInfoDto,
 ): GetEnterpriseDividendAnalysisResponseDto => ({
@@ -118,11 +148,15 @@ const createDetail = (
       periodYears: 10,
       reason: "10年分の推移を表示します",
     },
-    payoutRatio: { score: 14, maxScore: 20, reason: "配当性向を表示します" },
+    payoutRatio: {
+      score: 4,
+      maxScore: 15,
+      reason: "配当性向スコアを表示します",
+    },
     dividendYield: {
-      score: 15,
-      maxScore: 20,
-      reason: "直近利回りを表示します",
+      score: 9,
+      maxScore: 10,
+      reason: "配当利回りスコアを表示します",
     },
     financialMetrics: {
       score: 13,
@@ -223,6 +257,53 @@ describe("DividendAnalysisPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("新overview DTOのitemsをdividendScore順の上位50件として一覧表示する", async () => {
+    const items = Array.from({ length: 51 }, (_, index) =>
+      createOverviewItem(index + 1, index + 1),
+    );
+    const sortedTopItems = [...items]
+      .sort((left, right) => right.dividendScore - left.dividendScore)
+      .slice(0, 50);
+    const hiddenItem = items[0];
+
+    apiMockServer.use(
+      getEnterprisesControllerGetOverviewMockHandler(
+        createOverviewResponse(items),
+      ),
+      getEnterprisesControllerGetDividendAnalysisMockHandler(() =>
+        createDetail(enterprises[0]),
+      ),
+    );
+
+    render(<DividendAnalysisPage />);
+
+    expect(
+      await screen.findByRole("button", {
+        name: `${sortedTopItems[0].symbolId} ${sortedTopItems[0].companyName} 詳細を表示`,
+      }),
+    ).toBeInTheDocument();
+
+    const detailButtons = screen.getAllByRole("button", {
+      name: /R2\d{3} R2高配当候補\d{2} 詳細を表示/,
+    });
+
+    expect(detailButtons).toHaveLength(50);
+    expect(detailButtons[0]).toHaveAccessibleName(
+      `${sortedTopItems[0].symbolId} ${sortedTopItems[0].companyName} 詳細を表示`,
+    );
+    expect(detailButtons[49]).toHaveAccessibleName(
+      `${sortedTopItems[49].symbolId} ${sortedTopItems[49].companyName} 詳細を表示`,
+    );
+    expect(screen.getByText("50銘柄")).toBeInTheDocument();
+    expect(screen.queryByText(hiddenItem.companyName)).not.toBeInTheDocument();
+
+    const topRow = detailButtons[0].closest("tr");
+    expect(topRow).not.toBeNull();
+    const topCells = within(topRow as HTMLTableRowElement).getAllByRole("cell");
+    expect(topCells[3]).toHaveTextContent("51");
+    expect(topCells[3]).toHaveTextContent("/100");
+  });
+
   it("Templateはpropsで渡された状態を表示し選択を委譲する", async () => {
     const user = userEvent.setup();
     const onSelectSymbol = vi.fn();
@@ -284,6 +365,37 @@ describe("DividendAnalysisPage", () => {
     );
   });
 
+  it("一覧テーブルは配当性向にpayoutRatio、利回りにdividendYieldのscoreBreakdownを表示する", () => {
+    const onSelectSymbol = vi.fn();
+
+    render(
+      <DividendAnalysisTemplate
+        detail={null}
+        detailStatus="idle"
+        enterprises={enterprises}
+        error={null}
+        onRetry={vi.fn()}
+        onSelectSymbol={onSelectSymbol}
+        overview={quantsInfoResponse}
+        selectedSymbolId="2914"
+        status="success"
+      />,
+    );
+
+    const row = screen
+      .getByRole("button", {
+        name: "2914 日本たばこ産業 詳細を表示",
+      })
+      .closest("tr");
+
+    expect(row).not.toBeNull();
+
+    const cells = within(row as HTMLTableRowElement).getAllByRole("cell");
+
+    expect(cells[8]).toHaveTextContent("4/15");
+    expect(cells[9]).toHaveTextContent("9/10");
+  });
+
   it("指標詳細テーブルはmetricsとscoreBreakdownから配点、評価、得点、詳細を表示する", () => {
     const detail = details["2914"];
 
@@ -301,7 +413,48 @@ describe("DividendAnalysisPage", () => {
     expect(screen.getByText(/詳細: FCFを確認できます/)).toBeInTheDocument();
     expect(screen.getByText("配当利回り")).toBeInTheDocument();
     expect(
-      screen.getByText(/詳細: 直近利回りを表示します/),
+      screen.getByText(/詳細: 配当利回りスコアを表示します/),
+    ).toBeInTheDocument();
+  });
+
+  it("指標詳細テーブルは配当性向と配当利回りに対応するscoreBreakdownを表示する", () => {
+    const detail = details["2914"];
+
+    render(
+      <DividendMetricDetailTable
+        metrics={detail.metrics}
+        scoreBreakdown={detail.scoreBreakdown}
+      />,
+    );
+
+    const payoutRatioRow = screen.getByText("配当性向").closest("tr");
+    const dividendYieldRow = screen.getByText("配当利回り").closest("tr");
+
+    expect(payoutRatioRow).not.toBeNull();
+    expect(dividendYieldRow).not.toBeNull();
+
+    expect(
+      within(payoutRatioRow as HTMLTableRowElement).getByText("15点"),
+    ).toBeInTheDocument();
+    expect(
+      within(payoutRatioRow as HTMLTableRowElement).getByText("得点 4 / 15"),
+    ).toBeInTheDocument();
+    expect(
+      within(payoutRatioRow as HTMLTableRowElement).getByText(
+        /詳細: 配当性向スコアを表示します/,
+      ),
+    ).toBeInTheDocument();
+
+    expect(
+      within(dividendYieldRow as HTMLTableRowElement).getByText("10点"),
+    ).toBeInTheDocument();
+    expect(
+      within(dividendYieldRow as HTMLTableRowElement).getByText("得点 9 / 10"),
+    ).toBeInTheDocument();
+    expect(
+      within(dividendYieldRow as HTMLTableRowElement).getByText(
+        /詳細: 配当利回りスコアを表示します/,
+      ),
     ).toBeInTheDocument();
   });
 });

@@ -238,14 +238,14 @@ function toDonutItems(detail: DividendAnalysisDetailData) {
     ],
     [
       "配当性向",
-      detail.scoreBreakdown.dividendYield.score,
-      detail.scoreBreakdown.dividendYield.maxScore,
+      detail.scoreBreakdown.payoutRatio.score,
+      detail.scoreBreakdown.payoutRatio.maxScore,
       "#8b5cf6",
     ],
     [
       "利回り",
-      detail.scoreBreakdown.payoutRatio.score,
-      detail.scoreBreakdown.payoutRatio.maxScore,
+      detail.scoreBreakdown.dividendYield.score,
+      detail.scoreBreakdown.dividendYield.maxScore,
       "#60a5fa",
     ],
     [
